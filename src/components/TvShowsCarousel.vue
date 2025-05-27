@@ -317,8 +317,8 @@ body {
 
 .carousel {
   position: relative;
-  overflow: hidden;
-  padding: 0 5px; /* Añadimos padding para evitar que los botones de navegación se superpongan */
+  overflow: visible;
+  padding: 0 40px; /* Añadimos padding para evitar que los botones de navegación se superpongan */
 }
 
 .carousel-content {
@@ -390,6 +390,12 @@ body {
 .grid-card {
   width: 100%;
   margin-bottom: 0; /* Eliminamos el margen inferior ya que usamos gap */
+}
+
+.carousel-content::before,
+.carousel-content::after {
+  content: "";
+  flex: 0 20px; /* Espacio fantasma a izquierda y derecha */
 }
 
 /* Media queries para diferentes tamaños de pantalla */

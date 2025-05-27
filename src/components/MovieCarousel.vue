@@ -170,11 +170,9 @@ export default {
     },
     selectMovie(movie) {
       console.log('Película seleccionada:', movie);
-      // Aquí puedes implementar la navegación a la página de detalles de la película
     },
     toggleShowAll() {
       this.showAllMovies = !this.showAllMovies;
-      // Resetear la posición del scroll cuando volvemos a la vista de carrusel
       if (!this.showAllMovies) {
         this.scrollPosition = 0;
         this.$nextTick(() => {
@@ -289,15 +287,15 @@ export default {
 /* Estilos del carrusel */
 .carousel {
   position: relative;
-  overflow: hidden;
-  padding: 0 5px; /* Añadimos padding para evitar que los botones de navegación se superpongan */
+  overflow: visible;
+  padding: 0 40px; /* Añadimos padding para evitar que los botones de navegación se superpongan */
 }
 
 .carousel-content {
   display: flex;
   transition: transform 0.5s ease;
   /* Importante: Añadimos espacio entre las tarjetas */
-  gap: 10px;
+  gap: 16px;
 }
 
 .carousel .movie-card {
@@ -357,7 +355,18 @@ export default {
 /* Estilos específicos para las tarjetas en la vista de cuadrícula */
 .grid-card {
   width: 100%;
-  margin-bottom: 0; /* Eliminamos el margen inferior ya que usamos gap */
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  border-radius: 4px;
+}
+
+.carousel-content::before,
+.carousel-content::after {
+  content: "";
+  flex: 0 0 20px; /* ← Esto sí es válido */
 }
 
 /* Media queries para diferentes tamaños de pantalla */

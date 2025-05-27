@@ -1,6 +1,7 @@
 <script setup>
 import TvShowsCarousel from '@/components/TvShowsCarousel.vue';
 import MovieCarousel from '@/components/MovieCarousel.vue';
+import Footer from '@/components/Footer.vue';
 
 </script>
 
