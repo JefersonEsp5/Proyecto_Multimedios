@@ -1,12 +1,10 @@
 <script setup>
-import Home from './views/Home.vue'
 import Footer from './components/Footer.vue'
-
 </script>
 
 <template>
   <div class="app">
-    <Home />
+    <router-view />
     <Footer />
   </div>
 </template>
@@ -15,7 +13,11 @@ import Footer from './components/Footer.vue'
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* que tome al menos el alto completo de la ventana */
+  min-height: 100vh;
+}
+
+/* Para que el contenido ocupe espacio y el footer baje */
+router-view {
+  flex: 1;
 }
 </style>
-
