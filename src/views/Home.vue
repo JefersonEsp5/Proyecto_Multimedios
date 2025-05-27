@@ -1,7 +1,7 @@
 <script setup>
 import TvShowsCarousel from '@/components/TvShowsCarousel.vue';
 import MovieCarousel from '@/components/MovieCarousel.vue';
-import Footer from '@/components/Footer.vue';
+import ContinueWatching from '@/components/ContinueWatching.vue';
 
 </script>
 
@@ -11,6 +11,7 @@ import Footer from '@/components/Footer.vue';
     <div class="main-container">
         <MovieCarousel></MovieCarousel>
         <TvShowsCarousel></TvShowsCarousel>
+        <ContinueWatching></ContinueWatching>
     </div>
 
 </template>
