@@ -70,6 +70,11 @@ function resume(item) {
   flex-shrink: 0;
   cursor: pointer;
   color: white;
+  transition: transform 0.2s;
+}
+
+.watching-card:hover {
+  transform: scale(0.99);
 }
 
 .thumbnail {
