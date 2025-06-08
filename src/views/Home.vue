@@ -9,7 +9,7 @@ import MovieCarousel from '@/components/MovieCarousel.vue';
 
     <div class="main-container">
         <MovieCarousel></MovieCarousel>
-        <TvShowsCarousel></TvShowsCarousel>
+        <TvShowsCarousel/>
     </div>
 
 </template>
