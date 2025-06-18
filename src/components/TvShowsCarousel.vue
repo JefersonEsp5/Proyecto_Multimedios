@@ -6,27 +6,25 @@
         <h2>Series de TV populares</h2>
         <button class="see-all-btn" @click="toggleShowAll">
           <span>Ver todo</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
         </button>
       </div>
-      
+
       <div v-if="loading" class="loading-container">
         <div class="loading-spinner"></div>
         <p>Cargando series...</p>
       </div>
-      
+
       <div v-else-if="error" class="error-message">
         {{ error }}
       </div>
-      
+
       <div v-else class="carousel" ref="carouselRef">
         <div class="carousel-content" :style="{ transform: `translateX(-${scrollPosition}px)` }">
-          <div 
-            v-for="show in limitedShows" 
-            :key="show.id" 
-            class="show-card"
-            @click="selectShow(show)"
-          >
+          <div v-for="show in limitedShows" :key="show.id" class="show-card" @click="selectShow(show)">
             <div class="show-poster">
               <div class="rating">{{ show.rating }}</div>
               <img :src="show.poster" :alt="show.title" @error="setDefaultPoster" />
@@ -35,21 +33,19 @@
             <div class="show-year">{{ show.year }}</div>
           </div>
         </div>
-        
-        <button 
-          class="nav-button prev" 
-          @click="scroll('prev')" 
-          :class="{ 'hidden': scrollPosition <= 0 }"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+
+        <button class="nav-button prev" @click="scroll('prev')" :class="{ 'hidden': scrollPosition <= 0 }">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
         </button>
-        
-        <button 
-          class="nav-button next" 
-          @click="scroll('next')" 
-          :class="{ 'hidden': scrollPosition >= maxScroll }"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+
+        <button class="nav-button next" @click="scroll('next')" :class="{ 'hidden': scrollPosition >= maxScroll }">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
         </button>
       </div>
     </div>
@@ -60,26 +56,24 @@
         <h2>Todas las series</h2>
         <button class="see-all-btn" @click="toggleShowAll">
           <span>Volver</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
         </button>
       </div>
-      
+
       <div v-if="loading" class="loading-container">
         <div class="loading-spinner"></div>
         <p>Cargando series...</p>
       </div>
-      
+
       <div v-else-if="error" class="error-message">
         {{ error }}
       </div>
-      
+
       <div v-else class="shows-grid">
-        <div 
-          v-for="show in limitedShows" 
-          :key="show.id" 
-          class="show-card grid-card"
-          @click="selectShow(show)"
-        >
+        <div v-for="show in limitedShows" :key="show.id" class="show-card grid-card" @click="selectShow(show)">
           <div class="show-poster">
             <div class="rating">{{ show.rating }}</div>
             <img :src="show.poster" :alt="show.title" @error="setDefaultPoster" />
@@ -98,7 +92,7 @@
 import { getPopularSeries } from "@/services/tvdb";
 
 export default {
-  name: 'SeriesCarousel',
+  name: 'TvShowsCarousel',
   props: {
     maxItems: {
       type: Number,
@@ -122,7 +116,7 @@ export default {
   },
   computed: {
     limitedShows() {
-      return this.showAllShows 
+      return this.showAllShows
         ? this.tvShows.slice(0, this.maxItems)
         : this.tvShows.slice(0, this.carouselItems);
     }
@@ -133,7 +127,7 @@ export default {
       this.tvShows = shows
         .filter(show => show.poster && show.poster.includes('artworks.thetvdb.com'))
         .slice(0, this.maxItems + 10);
-      
+
       this.$nextTick(() => {
         this.updateMaxScroll();
       });
@@ -147,7 +141,7 @@ export default {
   methods: {
     updateMaxScroll() {
       if (!this.$refs.carouselRef) return;
-      
+
       const containerWidth = this.$refs.carouselRef.clientWidth;
       const contentWidth = this.$refs.carouselRef.querySelector('.carousel-content').scrollWidth;
       this.maxScroll = Math.max(0, contentWidth - containerWidth);
@@ -159,8 +153,9 @@ export default {
         this.scrollPosition = Math.max(this.scrollPosition - this.scrollAmount, 0);
       }
     },
+   
     selectShow(show) {
-      this.$emit('show-selected', show);
+      this.$router.push({ name: 'Show_Details', params: { id: show.id.toString() } });
     },
     toggleShowAll() {
       this.showAllShows = !this.showAllShows;
@@ -189,7 +184,8 @@ export default {
   box-sizing: border-box;
 }
 
-.carousel-container, .all-shows-container {
+.carousel-container,
+.all-shows-container {
   width: 100%;
   margin-bottom: 32px;
 }
@@ -397,8 +393,13 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-message {
@@ -415,20 +416,20 @@ export default {
   .carousel .show-card {
     width: 140px;
   }
-  
+
   .shows-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .carousel-header h2 {
     font-size: 20px;
   }
-  
+
   .nav-button {
     width: 36px;
     height: 36px;
   }
-  
+
   .carousel-content {
     gap: 12px;
   }
@@ -438,26 +439,26 @@ export default {
   .app {
     padding: 15px;
   }
-  
+
   .carousel .show-card {
     width: 160px;
   }
-  
+
   .shows-grid {
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
   }
-  
+
   .nav-button {
     width: 40px;
     height: 40px;
   }
-  
+
   .nav-button svg {
     width: 20px;
     height: 20px;
   }
-  
+
   .carousel-content {
     gap: 15px;
   }
@@ -467,19 +468,19 @@ export default {
   .app {
     padding: 20px;
   }
-  
+
   .carousel .show-card {
     width: 180px;
   }
-  
+
   .shows-grid {
     grid-template-columns: repeat(5, 1fr);
   }
-  
+
   .carousel-header h2 {
     font-size: 22px;
   }
-  
+
   .carousel-content {
     gap: 16px;
   }

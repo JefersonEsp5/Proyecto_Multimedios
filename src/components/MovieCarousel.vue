@@ -79,6 +79,7 @@
 <script>
 import { getPopularMovies } from "@/services/tvdb";
 
+
 export default {
   name: 'MoviesCarousel',
   props: {
@@ -89,6 +90,12 @@ export default {
     carouselItems: {
       type: Number,
       default: 10
+    }
+  },
+ 
+  methods: {
+    selectMovie(movie) {
+      this.$emit('movie-selected', movie)
     }
   },
   data() {
@@ -141,9 +148,10 @@ export default {
         this.scrollPosition = Math.max(this.scrollPosition - this.scrollAmount, 0);
       }
     },
+    
     selectMovie(movie) {
-      this.$emit('movie-selected', movie);
-    },
+  this.$router.push({ name: 'Movie_Details', params: { id: movie.id } });
+},
     toggleShowAll() {
       this.showAllMovies = !this.showAllMovies;
       if (!this.showAllMovies) {

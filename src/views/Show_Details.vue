@@ -3,24 +3,24 @@
     <button @click="$router.back()" class="back-button left">←</button>
     <button class="back-button right">⋮</button>
 
-    <div v-if="loading" class="loading">Cargando detalles...</div>
+    <div v-if="loading" class="loading">Cargando detalles de la serie...</div>
     <div v-else-if="error" class="error">{{ error }}</div>
 
-    <div v-else-if="movie" class="card">
-      <img :src="movie.image" :alt="movie.name" class="poster" />
+    <div v-else-if="tvShow" class="card">
+      <img :src="tvShow.image" :alt="tvShow.name" class="poster" />
       <div class="info">
-        <div class="tag">TV-Peliculas</div>
-        <h1 class="title">{{ movie.name }}</h1>
+        <div class="tag">TV-Serie</div>
+        <h1 class="title">{{ tvShow.name }}</h1>
         <div class="rating-row">
           <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" class="imdb-logo" alt="IMDb" />
-          <span class="rating">{{ movie.rating || 'N/A' }}</span>
-          <span class="details">• {{ movie.year || 'Desconocido' }} • {{ movie.runtime || 'No disponible' }} minutos</span>
+          <span class="rating">{{ tvShow.rating || 'N/A' }}</span>
+          <span class="details">• {{ tvShow.year || 'Desconocido' }} • {{ tvShow.runtime || 'No disponible' }} minutos</span>
         </div>
-        <div class="genres">
-          <span v-for="genre in movie.genres" :key="genre.id" class="genre-tag">{{ genre.name }}</span>
+         <div class="genres">
+          <span v-for="genre in tvShow.genres" :key="genre.id" class="genre-tag">{{ genre.name }}</span>
         </div>
-        <p class="overview">{{ movie.overview || 'No hay descripción disponible.' }}</p>
-        <p class="creators">Creadores: {{ movie.creators || 'No disponible' }}</p>
+        <p class="overview">{{ tvShow.overview || 'No hay descripción disponible.' }}</p>
+        <p class="creators">Creadores: {{ tvShow.creators || 'No disponible' }}</p>
         <button class="watch-button">Start watching</button>
         <div class="actions">
           <div class="action"><i class="fas fa-bookmark icon purple"></i><span>Add to watchlist</span></div>
@@ -32,13 +32,11 @@
   </div>
 </template>
 
-
-
 <script>
-import { getMovieDetails } from "@/services/tvdb";
+import { getSeriesDetails } from "@/services/tvdb";
 
 export default {
-  name: "MovieDetails",
+  name: "ShowDetails",
   props: {
     id: {
       type: String,
@@ -47,7 +45,7 @@ export default {
   },
   data() {
     return {
-      movie: null,
+      tvShow: null,
       loading: true,
       error: null,
     };
@@ -57,18 +55,17 @@ export default {
       this.loading = true;
       this.error = null;
 
-      const movieId = parseInt(this.id);
-      const data = await getMovieDetails(movieId);
-      this.movie = data;
+      const showId = parseInt(this.id);
+      const data = await getSeriesDetails(showId);
+      this.tvShow = data;
     } catch (e) {
-      this.error = "Error cargando detalles de la película.";
+      this.error = "Error cargando detalles de la serie.";
     } finally {
       this.loading = false;
     }
   },
 };
 </script>
-
 <style scoped>
 body, html {
   margin: 0;
@@ -86,7 +83,7 @@ body, html {
   flex-direction: column;
   align-items: center;
   height: 100vh;
-   overflow: auto;
+  overflow: auto;
 }
 
 .back-button {
@@ -137,18 +134,6 @@ body, html {
   z-index: 2;
   width: 100%;
 }
-.rating-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center; 
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-  flex-wrap: wrap;
-  text-align: center;
-}
-
-
 
 .tag {
   color: #f56565;
@@ -164,11 +149,15 @@ body, html {
 
 .rating-row {
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: center; 
   gap: 0.75rem;
   margin-top: 0.5rem;
   flex-wrap: wrap;
+  text-align: center;
 }
+
 
 .imdb-logo {
   width: 3rem;
@@ -188,7 +177,7 @@ body, html {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 1rem;
-   justify-content: center; 
+  justify-content: center; 
 }
 
 .genre-tag {
@@ -260,8 +249,8 @@ body, html {
 }
 /*movil*/
 @media (max-width: 768px) {
-  .page-container{
-       overflow: auto;
+  .page-container{ 
+    overflow-y: auto;
   }
   .card {
     padding: 0 1rem;
@@ -283,6 +272,7 @@ body, html {
     font-size: 1.5rem;
     text-align: center;
   }
+
 .rating-row {
   display: flex;
   flex-direction: row;
