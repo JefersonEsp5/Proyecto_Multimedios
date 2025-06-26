@@ -1,17 +1,29 @@
 <script setup>
 import TvShowsCarousel from '@/components/TvShowsCarousel.vue';
 import MovieCarousel from '@/components/MovieCarousel.vue';
+import MovieNavbar from '@/components/MovieNavBar.vue';
+import SearchResults from '@/views/SearchResults.vue'; // <--- NEW: Import SearchResults
 
+// NEW: Import the search store to access its state
+import { useSearchStore } from '@/storages/search.js'; 
+
+const searchStore = useSearchStore(); // <--- NEW: Initialize the search store
 </script>
 
-
 <template>
-
-    <div class="main-container">
-        <MovieCarousel></MovieCarousel>
-        <TvShowsCarousel/>
+  <div class="main-container">
+    <MovieNavbar />
+    
+    <div v-if="searchStore.searchText || searchStore.hasResults || searchStore.isSearching">
+        <SearchResults />
     </div>
 
+    <template v-else>
+      <MovieCarousel></MovieCarousel>
+      <TvShowsCarousel/>
+    </template>
+    
+  </div>
 </template>
 
 <style>

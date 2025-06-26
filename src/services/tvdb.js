@@ -133,10 +133,63 @@ async function getSeriesDetails(seriesId) {
     return null;
   }
 }
+// --- Nueva función de búsqueda genérica ---
+// --- FUNCIÓN searchMedia CON LOGS DETALLADOS ---
+async function searchMedia(query) {
+        console.log(`TVDB Service: Query received in searchMedia: ${query}`);
+        try {
+            const url = `/search?query=${encodeURIComponent(query)}`;
+            console.log(`TVDB Service: Search URL constructed: ${url}`);
+            const response = await makeAuthenticatedRequest(url);
+            console.log("TVDB Service: RAW API search response:", response);
+
+            if (response && response.data) {
+                const TVDB_ARTWORKS_BASE_URL = "https://api4.thetvdb.com";
+                const processedResults = response.data.map(item => {
+                    let posterUrl = item.image || item.poster || null; // Use the correct property for poster from the raw API response
+
+                    // --- FIX: Clean up the poster URL here ---
+                    if (posterUrl && typeof posterUrl === 'string') {
+                        // Remove any potential duplicate base URLs
+                        if (posterUrl.startsWith(TVDB_ARTWORKS_BASE_URL) && posterUrl.indexOf(TVDB_ARTWORKS_BASE_URL, 1) !== -1) {
+                            posterUrl = posterUrl.substring(TVDB_ARTWORKS_BASE_URL.length);
+                        }
+                        // Ensure it has the correct base URL if it's a relative path or missing it
+                        if (posterUrl && !posterUrl.startsWith('http')) { // If it's not an absolute URL already
+                            posterUrl = TVDB_ARTWORKS_BASE_URL + (posterUrl.startsWith('/') ? '' : '/') + posterUrl;
+                        }
+                    }
+                    // --- END FIX ---
+
+                    return {
+                        id: item.id,
+                        type: item.type, // Assuming 'movie' or 'series' directly from API
+                        title: item.name || item.title || 'N/A', // Use item.name for series, item.title for movies
+                        poster: posterUrl,
+                        year: item.year || 'N/A',
+                        rating: item.score ? item.score.toFixed(1) : 'N/A', // Assuming score is a number
+                        description: item.overview || 'No description available.',
+                        // Add other fields you need
+                    };
+                });
+                console.log(`TVDB Service: Processed results count: ${processedResults.length}`);
+                console.log("TVDB Service: First processed results (sample):", processedResults.slice(0, 3));
+                return processedResults;
+            }
+            return [];
+        } catch (error) {
+            console.error("TVDB Service: Error searching media:", error);
+            throw new Error(`Failed to search media: ${error.message}`);
+        } finally {
+            console.log("TVDB Service: --- EXITING searchMedia ---");
+        }
+    }
+
 
 export { 
   getPopularMovies, 
   getMovieDetails,
   getPopularSeries,
-  getSeriesDetails
+  getSeriesDetails,
+  searchMedia
 };
