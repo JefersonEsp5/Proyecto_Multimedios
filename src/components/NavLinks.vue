@@ -1,11 +1,11 @@
 <template>
   <ul class="nav-links">
-   <li
-  :class="['nav-item', { active: activeLink === 'inicio' }]"
-  @click="setActive('inicio')"
->
-  <a href="#" class="nav-link" @click.prevent="navigate('Home')">Inicio</a>
-</li>
+    <li
+      :class="['nav-item', { active: activeLink === 'inicio' }]"
+      @click="setActive('inicio')"
+    >
+      <a href="#" class="nav-link" @click.prevent="navigate('Home')">Inicio</a>
+    </li>
 
     <li
       :class="['nav-item', { active: activeLink === 'peliculas' }]"
@@ -29,6 +29,8 @@
 </template>
 
 <script>
+import { useSearchStore } from '@/storages/search';
+
 export default {
   name: 'NavLinks',
   data() {
@@ -36,21 +38,26 @@ export default {
       activeLink: 'inicio',
     };
   },
- methods: {
-  setActive(link) {
-    this.activeLink = link;
-  },
-  navigate(routeName) {
-    this.$emit('link-clicked', routeName);
-    this.$router.push({ name: routeName });
-  }
-}
+  methods: {
+    setActive(link) {
+      this.activeLink = link;
+    },
+    navigate(routeName) {
+      //  Accede al store y limpia si vas a Home
+      const searchStore = useSearchStore();
+      if (routeName === 'Home') {
+        searchStore.clearSearchResults(); // limpia el estado
+      }
 
+      this.$emit('link-clicked', routeName);
+      this.$router.push({ name: routeName });
+    },
+  },
 };
 </script>
 
+
 <style scoped>
-/* Enlaces principales horizontal */
 .nav-links {
   list-style: none;
   display: flex;
@@ -59,14 +66,14 @@ export default {
   gap: 25px;
 }
 
-/* Cada elemento li */
+
 .nav-item {
   position: relative;
 }
 
-/* Estilo general del enlace */
+
 .nav-link {
-  position: relative; /* Necesario para ::after */
+  position: relative; 
   display: inline-block;
   text-decoration: none;
   color: white;
@@ -78,14 +85,14 @@ export default {
   transition: background-color 0.3s ease, color 0.3s ease, border-radius 0.3s ease;
 }
 
-/* Hover */
+
 .nav-link:hover {
   background-color: rgba(99, 102, 241, 0.2);
   color: #6366f1;
   border-radius: 5px;
 }
 
-/* Línea inferior del activo */
+
 .nav-item.active .nav-link::after {
   content: '';
   position: absolute;

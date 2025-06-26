@@ -39,7 +39,6 @@
 <script setup>
 import { useSearchStore } from '@/storages/search.js';
 import { onMounted } from 'vue';
-
 const props = defineProps({
   query: String
 });
