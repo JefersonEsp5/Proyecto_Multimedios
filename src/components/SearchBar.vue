@@ -4,11 +4,9 @@
       type="text"
       placeholder="Search"
       v-model="searchStore.searchText"
-      @keyup.enter="searchStore.performSearch"
-      style="font-size: 14px;"
+      @keyup.enter="handleSearch" style="font-size: 14px;"
     />
-    <button @click="searchStore.performSearch">
-      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <button @click="handleSearch"> <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
@@ -18,37 +16,33 @@
 
 <script setup>
 import { useSearchStore } from '@/storages/search';
+import { useRouter } from 'vue-router'; // ¡IMPORTA useRouter AQUÍ!
+import { watch } from 'vue'; // Ya lo tenías, solo para referencia
 
 // Obtén una instancia de tu store de búsqueda
 const searchStore = useSearchStore();
 
-// V-model y el evento @keyup.enter se enlazan directamente a las propiedades y acciones del store.
+// Obtén la instancia del router aquí, donde sí estás en un contexto de componente Vue.
+const router = useRouter(); 
 
-
-
-
-// Función para depurar
-const performAndLogSearch = () => {
-  console.log('Texto de búsqueda:', searchStore.searchText); // Muestra el texto actual del input
-  searchStore.performSearch(); // Llama a la acción real de búsqueda
-  console.log('Resultados de búsqueda después de performSearch:', searchStore.searchResults); // Muestra los resultados (podrían estar vacíos si la llamada es asíncrona)
-  console.log('¿Está cargando la búsqueda?', searchStore.loading); // Muestra el estado de carga
+// Crea una nueva función para manejar la búsqueda.
+// Esta función llamará a la acción de tu store y le pasará la instancia del router.
+const handleSearch = () => {
+  searchStore.performSearch(router); // <-- ¡PASANDO EL ROUTER!
 };
 
-// Puedes añadir un watch para ver el searchText en tiempo real
-import { watch } from 'vue';
+// --- Tu código de depuración existente (actualizado) ---
+const performAndLogSearch = () => {
+  console.log('Texto de búsqueda:', searchStore.searchText);
+  // Asegúrate de pasar el router si usas esta función de depuración también
+  searchStore.performSearch(router); 
+  console.log('Resultados de búsqueda después de performSearch:', searchStore.searchResults);
+  console.log('¿Está cargando la búsqueda?', searchStore.loading);
+};
+
 watch(() => searchStore.searchText, (newVal) => {
   console.log('searchText ha cambiado a:', newVal);
 });
-
-
-
-
-
-
-
-
-
 </script>
 
 <style scoped>

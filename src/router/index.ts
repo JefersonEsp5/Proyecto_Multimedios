@@ -27,8 +27,7 @@ const routes = [
     path: '/search', 
     name: 'SearchResults',
     component: SearchResultsView,
-    // Puedes pasar props a la vista si es necesario, aunque con Pinia no es tan crucial
-    props: (route) => ({ query: route.query.q }), // Ejemplo: pasar la query como prop si la URL fuera /search?q=query
+    props: (route) => ({ query: route.query.q }), 
   },
 ]
 

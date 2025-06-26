@@ -1,4 +1,3 @@
-
 <template>
   <div class="search-results">
     <p v-if="searchStore.isSearching" class="loading-message">Buscando...</p>
@@ -14,8 +13,16 @@
     </p>
 
     <div v-if="searchStore.hasResults" class="results-grid">
-      <div v-for="item in searchStore.searchResults" :key="item.id" class="result-card">
-        <img :src="item.poster || 'https://via.placeholder.com/300x450?text=No+Poster'" :alt="item.title" class="result-poster" />
+      <div
+        v-for="item in searchStore.searchResults"
+        :key="item.id"
+        class="result-card"
+      >
+        <img
+          :src="item.poster || 'https://via.placeholder.com/300x450?text=No+Poster'"
+          :alt="item.title"
+          class="result-poster"
+        />
         <div class="result-info">
           <h3>{{ item.title }} ({{ item.type }})</h3>
           <p>Año: {{ item.year }}</p>
@@ -30,24 +37,35 @@
 </template>
 
 <script setup>
-import { useSearchStore} from '@/storages/search.js';
-// Importa también tu store de usuario/listas cuando lo tengas implementado
-// import { useUserStore } from '@/stores/user';
+import { useSearchStore } from '@/storages/search.js';
+import { onMounted } from 'vue';
+
+const props = defineProps({
+  query: String
+});
 
 const searchStore = useSearchStore();
-// const userStore = useUserStore(); // Descomentar cuando tengas el store de usuario
 
-// Funciones para añadir a las listas (Estas interactuarían con el userStore y tu backend/Turso)
+// Si se accede directamente con la URL /search?q=texto, esto asegura que se haga la búsqueda.
+onMounted(() => {
+  if (props.query && props.query !== searchStore.searchText) {
+    searchStore.searchText = props.query;
+    searchStore.performSearch(); // No necesita router aquí, solo recupera resultados
+  }
+});
+
+// Simulación de funciones para listas (cuando conectes con userStore las puedes usar)
 const addToWatchlist = (item) => {
   console.log(`Añadir a Watchlist: ${item.title}`);
-  // userStore.addToList(item, 'watchlist'); // Ejemplo
+  // userStore.addToList(item, 'watchlist');
 };
 
 const addToFavorites = (item) => {
   console.log(`Añadir a Favorites: ${item.title}`);
-  // userStore.addToList(item, 'favorites'); // Ejemplo
+  // userStore.addToList(item, 'favorites');
 };
 </script>
+
 
 <style scoped>
 .search-results {
