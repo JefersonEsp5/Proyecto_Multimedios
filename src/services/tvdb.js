@@ -29,10 +29,10 @@ async function makeAuthenticatedRequest(url, options = {}) {
     if (response.status === 401) {
       token = await authenticate();
       if (!token) throw new Error("No se pudo renovar el token");
-      
+
       defaultOptions.headers.Authorization = `Bearer ${token}`;
       const retryResponse = await fetch(`${BASE_URL}${url}`, defaultOptions);
-      
+
       if (!retryResponse.ok) throw new Error(`Error ${retryResponse.status}: ${retryResponse.statusText}`);
       return await retryResponse.json();
     }
@@ -71,7 +71,7 @@ async function authenticate() {
 async function getPopularMovies(page = 1) {
   try {
     const data = await makeAuthenticatedRequest(`/movies?page=${page}`);
-    
+
     // Procesamos los datos para adaptarlos a nuestra interfaz
     return data.data.map(movie => ({
       id: movie.id,
@@ -91,6 +91,7 @@ async function getPopularMovies(page = 1) {
 async function getMovieDetails(movieId) {
   try {
     const data = await makeAuthenticatedRequest(`/movies/${movieId}/extended`);
+    console.log("Datos completos de la película:", data); // Agrega esta línea para registrar los datos
     return data.data;
   } catch (error) {
     console.error("Error al obtener detalles de la película:", error);
@@ -98,11 +99,28 @@ async function getMovieDetails(movieId) {
   }
 }
 
+// Obtener reparto de una película
+function extractMovieCast(movieDetails) {
+  if (!movieDetails.characters) return [];
+  return movieDetails.characters.map(character => ({
+    id: character.id,
+    name: character.personName || 'Desconocido',
+    role: character.name || 'Sin rol definido',
+    image: character.personImgURL || null
+  }));
+}
+function extractMovieCreators(movieDetails) {
+  if (!movieDetails.companies || !movieDetails.companies.production) return [];
+  return movieDetails.companies.production.map(company => ({
+    id: company.id,
+    name: company.name
+  }));
+}
 // Obtener series populares
 async function getPopularSeries(page = 1, limit = 30) {
   try {
     const data = await makeAuthenticatedRequest(`/series?page=${page}`);
-    
+
     // Procesamos los datos para adaptarlos a nuestra interfaz
     const processedSeries = data.data.map(series => ({
       id: series.id,
@@ -126,65 +144,91 @@ async function getPopularSeries(page = 1, limit = 30) {
 async function getSeriesDetails(seriesId) {
   try {
     const data = await makeAuthenticatedRequest(`/series/${seriesId}/extended`);
+    console.log("Datos completos de la serie:", data);
     return data.data;
   } catch (error) {
     console.error("Error al obtener detalles de la serie:", error);
     return null;
   }
 }
-async function searchMedia(query) {
-    console.log(`TVDB Service: Query received in searchMedia: ${query}`);
-    try {
-        const url = `/search?query=${encodeURIComponent(query)}`;
-        console.log(`TVDB Service: Search URL constructed: ${url}`);
-        const response = await makeAuthenticatedRequest(url);
-        console.log("TVDB Service: RAW API search response:", response);
 
-        if (response && response.data) {
-            const TVDB_ARTWORKS_BASE_URL = "https://api4.thetvdb.com/v4"; 
-            const processedResults = response.data.map(item => {
-                let posterUrl = null;
-                if (item.image_url) {
-                    posterUrl = item.image_url;
-                } else if (item.poster) { 
-                    posterUrl = item.poster;
-                } else if (item.thumbnail) { 
-                    posterUrl = item.thumbnail;
-                } else if (item.posters && item.posters.length > 0) { 
-                    posterUrl = item.posters[0];
-                }
-                if (posterUrl && typeof posterUrl === 'string') {
-                    if (!posterUrl.startsWith('http')) {
-                        posterUrl = TVDB_ARTWORKS_BASE_URL + (posterUrl.startsWith('/') ? '' : '/') + posterUrl;
-                    }
-                }   
-                return {
-                    id: item.id,
-                    type: item.type, 
-                    title: item.name || item.title || 'N/A', 
-                    poster: posterUrl,
-                    year: item.year || 'N/A',
-                    rating: item.score ? item.score.toFixed(1) : 'N/A', 
-                    description: item.overview || 'No description available.',
-                };
-            });
-            console.log(`TVDB Service: Processed results count: ${processedResults.length}`);
-            console.log("TVDB Service: First processed results (sample):", processedResults.slice(0, 3));
-            return processedResults;
-        }
-        return [];
-    } catch (error) {
-        console.error("TVDB Service: Error searching media:", error);
-        throw new Error(`Failed to search media: ${error.message}`);
-    } finally {
-      
-    }
+// Nuevas funciones para extraer reparto y creadores de series
+function extractSeriesCast(seriesDetails) {
+  if (!seriesDetails.characters) return [];
+  return seriesDetails.characters.map(character => ({
+    id: character.id,
+    name: character.personName || 'Desconocido',
+    role: character.name || 'Sin rol definido',
+    image: buildImageUrl(character.personImgURL) || 'https://placehold.co/100x140?text=No+Image' // ¡CAMBIO AQUÍ!
+  })).filter(actor => actor.image);
 }
 
-export { 
-  getPopularMovies, 
+function extractSeriesCreators(seriesDetails) {
+  if (!seriesDetails.companies || !seriesDetails.companies.production) return [];
+  return seriesDetails.companies.production.map(company => ({
+    id: company.id,
+    name: company.name
+  }));
+}
+
+
+async function searchMedia(query) {
+  console.log(`TVDB Service: Query received in searchMedia: ${query}`);
+  try {
+    const url = `/search?query=${encodeURIComponent(query)}`;
+    console.log(`TVDB Service: Search URL constructed: ${url}`);
+    const response = await makeAuthenticatedRequest(url);
+    console.log("TVDB Service: RAW API search response:", response);
+
+    if (response && response.data) {
+      const TVDB_ARTWORKS_BASE_URL = "https://api4.thetvdb.com/v4";
+      const processedResults = response.data.map(item => {
+        let posterUrl = null;
+        if (item.image_url) {
+          posterUrl = item.image_url;
+        } else if (item.poster) {
+          posterUrl = item.poster;
+        } else if (item.thumbnail) {
+          posterUrl = item.thumbnail;
+        } else if (item.posters && item.posters.length > 0) {
+          posterUrl = item.posters[0];
+        }
+        if (posterUrl && typeof posterUrl === 'string') {
+          if (!posterUrl.startsWith('http')) {
+            posterUrl = TVDB_ARTWORKS_BASE_URL + (posterUrl.startsWith('/') ? '' : '/') + posterUrl;
+          }
+        }
+        return {
+          id: item.id,
+          type: item.type,
+          title: item.name || item.title || 'N/A',
+          poster: posterUrl,
+          year: item.year || 'N/A',
+          rating: item.score ? item.score.toFixed(1) : 'N/A',
+          description: item.overview || 'No description available.',
+        };
+      });
+      console.log(`TVDB Service: Processed results count: ${processedResults.length}`);
+      console.log("TVDB Service: First processed results (sample):", processedResults.slice(0, 3));
+      return processedResults;
+    }
+    return [];
+  } catch (error) {
+    console.error("TVDB Service: Error searching media:", error);
+    throw new Error(`Failed to search media: ${error.message}`);
+  } finally {
+
+  }
+}
+
+export {
+  getPopularMovies,
   getMovieDetails,
   getPopularSeries,
   getSeriesDetails,
-  searchMedia
+  searchMedia,
+  extractMovieCreators,
+  extractMovieCast,
+  extractSeriesCast,
+  extractSeriesCreators
 };
