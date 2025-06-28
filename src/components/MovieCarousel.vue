@@ -1,190 +1,117 @@
 <template>
-  <div class="app">
-    <div v-if="!showAllMovies" class="carousel-container">
-      <div class="carousel-header">
-        <h2>Películas recomendadas</h2>
-        <button class="see-all-btn" @click="toggleShowAll">
-          <span>Ver todo</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
-      </div>
-
-      <div v-if="mediaStore.loadingMovies" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>Cargando películas...</p>
-      </div>
-
-      <div v-else-if="mediaStore.errorMovies" class="error-message">
-        {{ mediaStore.errorMovies }}
-      </div>
-
-      <div v-else class="carousel" ref="carouselRef">
-        <div class="carousel-content" :style="{ transform: `translateX(-${scrollPosition}px)` }">
-          <div v-for="movie in limitedMovies" :key="movie.id" class="movie-card" @click="selectMovie(movie)">
-            <div class="movie-poster">
-              <div class="rating">{{ movie.rating }}</div>
-              <img :src="movie.poster" :alt="movie.title" @error="setDefaultPoster" />
-            </div>
-            <div class="movie-title">{{ movie.title }}</div>
-            <div class="movie-year">{{ movie.year }}</div>
-          </div>
-        </div>
-
-        <button class="nav-button prev" @click="scroll('prev')" :class="{ 'hidden': scrollPosition <= 0 }">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>
-
-        <button class="nav-button next" @click="scroll('next')" :class="{ 'hidden': scrollPosition >= maxScroll }">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
-      </div>
+  <div class="carousel-container">
+    <div class="carousel-header">
+      <h2>Películas recomendadas</h2>
+      <button class="see-all-btn" @click="toggleView">
+        {{ showAll ? 'Volver' : 'Ver todo' }}
+        <svg class="arrow-icon" fill="currentColor" viewBox="0 0 20 20" v-if="!showAll">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+        </svg>
+      </button>
     </div>
 
-    <div v-else class="all-movies-container">
-      <div class="carousel-header">
-        <h2>Todas las películas</h2>
-        <button class="see-all-btn" @click="toggleShowAll">
-          <span>Volver</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
+    <div v-if="mediaStore.loadingMovies" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Cargando películas...</p>
+    </div>
+    <div v-else-if="mediaStore.errorMovies" class="error-message">
+      {{ mediaStore.errorMovies }}
+    </div>
+    <div v-else>
+      <div v-if="!showAll" class="carousel">
+        <div class="carousel-content" :style="{ transform: `translateX(-${carouselOffset}px)` }">
+          <MovieCard
+            v-for="movie in mediaStore.popularMovies.slice(0, 20)"
+            :key="movie.id"
+            :movie="movie"
+            class="carousel-card"
+          />
+        </div>
+        <button v-if="mediaStore.popularMovies.length > 0" class="nav-button prev" @click="scrollCarousel(-1)">
+          <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
         </button>
-      </div>
-
-      <div v-if="mediaStore.loadingMovies" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>Cargando películas...</p>
-      </div>
-
-      <div v-else-if="mediaStore.errorMovies" class="error-message">
-        {{ mediaStore.errorMovies }}
+        <button v-if="mediaStore.popularMovies.length > 0" class="nav-button next" @click="scrollCarousel(1)">
+          <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+        </button>
       </div>
 
       <div v-else class="movies-grid">
-        <div v-for="movie in allMovies" :key="movie.id" class="movie-card grid-card" @click="selectMovie(movie)">
-          <div class="movie-poster">
-            <div class="rating">{{ movie.rating }}</div>
-            <img :src="movie.poster" :alt="movie.title" @error="setDefaultPoster" />
-          </div>
-          <div class="movie-info">
-            <div class="movie-title">{{ movie.title }}</div>
-            <div class="movie-year">{{ movie.year }}</div>
-          </div>
-        </div>
+        <MovieCard
+          v-for="movie in mediaStore.popularMovies"
+          :key="movie.id"
+          :movie="movie"
+          class="grid-card"
+        />
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
-import { useMediaStore } from '@/storages/mediaStore'; // Importa tu store de Pinia
+<script>
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
+import { useMediaStore } from '@/storages/mediaStore';
+import MovieCard from '@/components/MovieCard.vue'; // Importa MovieCard
 
-// Inicializa el router
-const router = useRouter();
-
-// Inicializa el store de Pinia
-const mediaStore = useMediaStore();
-
-// Props (sin cambios)
-const props = defineProps({
-  maxItems: {
-    type: Number,
-    default: 20
+export default {
+  name: 'MovieCarousel',
+  components: {
+    MovieCard // Registra MovieCard
   },
-  carouselItems: {
-    type: Number,
-    default: 10
-  }
-});
+  setup() {
+    const mediaStore = useMediaStore();
+    const showAll = ref(false);
+    const carouselOffset = ref(0);
+    const carouselElement = ref(null); // Ref para el elemento del carrusel
 
-// Estado local del componente
-const scrollPosition = ref(0);
-const maxScroll = ref(0);
-const scrollAmount = 200;
-const showAllMovies = ref(false); // Ahora es un ref para Composition API
-const carouselRef = ref(null); // Referencia al elemento del carrusel
-
-// Computed properties
-const limitedMovies = computed(() => {
-  return mediaStore.popularMovies.slice(0, props.carouselItems);
-});
-
-const allMovies = computed(() => {
-  return mediaStore.popularMovies.slice(0, props.maxItems);
-});
-
-
-// Métodos
-const updateMaxScroll = () => {
-  if (!carouselRef.value) return;
-
-  const containerWidth = carouselRef.value.clientWidth;
-  const contentWidth = carouselRef.value.querySelector('.carousel-content').scrollWidth;
-  maxScroll.value = Math.max(0, contentWidth - containerWidth);
-};
-
-const scroll = (direction) => {
-  if (direction === 'next') {
-    scrollPosition.value = Math.min(scrollPosition.value + scrollAmount, maxScroll.value);
-  } else {
-    scrollPosition.value = Math.max(scrollPosition.value - scrollAmount, 0);
-  }
-};
-
-const selectMovie = (movie) => {
-  router.push({ name: 'Movie_Details', params: { id: movie.id } });
-};
-
-const toggleShowAll = () => {
-  showAllMovies.value = !showAllMovies.value;
-  if (!showAllMovies.value) {
-    scrollPosition.value = 0;
-    nextTick(() => {
-      updateMaxScroll();
+    onMounted(() => {
+      mediaStore.fetchPopularMovies();
     });
+
+    // ... (El resto de tu lógica para el carrusel, scroll, toggleView, etc.)
+    // La lógica de onImageError ya está en MovieCard, no la necesitas aquí.
+    // La lógica de goToDetails también está en MovieCard, no la necesitas aquí.
+
+    const toggleView = () => {
+      showAll.value = !showAll.value;
+      if (!showAll.value) { // Reset carousel position when going back
+        carouselOffset.value = 0;
+      }
+    };
+
+    const scrollCarousel = (direction) => {
+      const cardWidth = 120 + 10; // Ancho de la tarjeta + gap
+      const viewportWidth = carouselElement.value ? carouselElement.value.clientWidth : 0;
+      const scrollAmount = viewportWidth > 0 ? viewportWidth : cardWidth * 5; // Scrolls by viewport or 5 cards
+
+      if (direction === 1) {
+        const maxOffset = mediaStore.popularMovies.length * cardWidth - viewportWidth;
+        carouselOffset.value = Math.min(carouselOffset.value + scrollAmount, maxOffset);
+      } else {
+        carouselOffset.value = Math.max(carouselOffset.value - scrollAmount, 0);
+      }
+    };
+
+    return {
+      mediaStore,
+      showAll,
+      toggleView,
+      carouselOffset,
+      scrollCarousel,
+      carouselElement, // Exporta la ref para poder vincularla en el template
+    };
   }
 };
-
-const setDefaultPoster = (event) => {
-  event.target.src = 'https://via.placeholder.com/300x450?text=No+Poster';
-  event.target.classList.add('error-poster');
-};
-
-// Hook de ciclo de vida
-onMounted(() => {
-  // Dispara la acción de Pinia para cargar las películas
-  mediaStore.fetchPopularMovies();
-
-  // Asegúrate de que los elementos estén renderizados antes de calcular maxScroll
-  nextTick(() => {
-    updateMaxScroll();
-  });
-});
 </script>
 
 <style scoped>
-/* Estilos base */
-.app {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 10px;
-  box-sizing: border-box;
-}
+/* Los estilos generales (app, carousel-header, see-all-btn, loading, error, etc.)
+   se mantienen aquí.
+   Los estilos específicos de .movie-card, .movie-poster, .rating, .movie-info,
+   .movie-title, .movie-year YA ESTÁN EN MovieCard.vue, así que se ELIMINAN de aquí.
+   SOLO DEJA LOS ESTILOS DEL CAROUSEL Y DEL GRID (que usan las clases pasadas al MovieCard).
+*/
 
-.carousel-container, .all-movies-container {
+.carousel-container {
   width: 100%;
   margin-bottom: 32px;
 }
@@ -223,81 +150,6 @@ onMounted(() => {
   height: 16px;
 }
 
-/* Estilos de tarjetas */
-.movie-card {
-  cursor: pointer;
-  transition: transform 0.2s;
-  position: relative;
-}
-
-.movie-card:hover {
-  transform: scale(1.05);
-  z-index: 2;
-}
-
-.movie-poster {
-  position: relative;
-  border-radius: 4px;
-  overflow: hidden;
-  background-color: #0a0a0a;
-}
-
-.movie-poster::before {
-  content: "";
-  display: block;
-  padding-top: 150%;
-}
-
-.movie-poster img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-
-.movie-poster img.error-poster {
-  object-fit: contain;
-  padding: 20%;
-  background-color: #222;
-}
-
-.rating {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 14px;
-  z-index: 2;
-}
-
-.movie-title {
-  margin-top: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: white;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.movie-year {
-  font-size: 12px;
-  color: #aaa;
-  margin-top: 4px;
-}
-
-.movie-info {
-  padding: 8px 0;
-}
-
-
 /* Estilos del carrusel */
 .carousel {
   position: relative;
@@ -311,8 +163,8 @@ onMounted(() => {
   gap: 10px;
 }
 
-.carousel .movie-card {
-  width: 120px;
+.carousel-card { /* Esta clase se aplica a MovieCard cuando está en el carrusel */
+  width: 120px; /* Ancho fijo para las tarjetas en el carrusel */
   flex-shrink: 0;
 }
 
@@ -364,39 +216,9 @@ onMounted(() => {
   gap: 15px;
 }
 
-.grid-card {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.grid-card .movie-poster {
-  flex-shrink: 0;
-  width: 100%;
-}
-
-.grid-card .movie-info {
-  padding: 8px;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.grid-card .movie-title {
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-height: 1.2;
-  height: 2.4em;
-}
-
-.grid-card .movie-year {
-  margin-top: auto;
+.grid-card { /* Esta clase se aplica a MovieCard cuando está en la cuadrícula */
+  width: 100%; /* El ancho lo controla el grid */
+  /* Los estilos de flex-direction, height, etc. están en MovieCard.vue */
 }
 
 /* Loading y error styles */
@@ -437,10 +259,9 @@ onMounted(() => {
   margin: 10px 0;
 }
 
-
 /* Media queries */
 @media (min-width: 480px) {
-  .carousel .movie-card {
+  .carousel-card {
     width: 140px;
   }
   .movies-grid {
@@ -459,10 +280,7 @@ onMounted(() => {
 }
 
 @media (min-width: 768px) {
-  .app {
-    padding: 15px;
-  }
-  .carousel .movie-card {
+  .carousel-card {
     width: 160px;
   }
   .movies-grid {
@@ -483,10 +301,7 @@ onMounted(() => {
 }
 
 @media (min-width: 1024px) {
-  .app {
-    padding: 20px;
-  }
-  .carousel .movie-card {
+  .carousel-card {
     width: 180px;
   }
   .movies-grid {

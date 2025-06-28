@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import Movies_View from '@/views/Movies_View.vue'
+import TvShows_View from '@/views/TvShows_View.vue'
 import ShowDetails from '@/views/Show_Details.vue'
 import MovieDetails from '@/views/Movie_Details.vue'
 
@@ -10,6 +12,16 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/movies', // URL para la sección de películas
+    name: 'Movies',
+    component: Movies_View
+  },
+  {
+    path: '/shows', // URL para la sección de series
+    name: 'TvShows',
+    component: TvShows_View
   },
   {
     path: '/movie/:id',
