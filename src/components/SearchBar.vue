@@ -16,25 +16,19 @@
 
 <script setup>
 import { useSearchStore } from '@/storages/search';
-import { useRouter } from 'vue-router'; // ¡IMPORTA useRouter AQUÍ!
-import { watch } from 'vue'; // Ya lo tenías, solo para referencia
+import { useRouter } from 'vue-router'; 
+import { watch } from 'vue'; 
 
-// Obtén una instancia de tu store de búsqueda
 const searchStore = useSearchStore();
 
-// Obtén la instancia del router aquí, donde sí estás en un contexto de componente Vue.
 const router = useRouter(); 
 
-// Crea una nueva función para manejar la búsqueda.
-// Esta función llamará a la acción de tu store y le pasará la instancia del router.
 const handleSearch = () => {
-  searchStore.performSearch(router); // <-- ¡PASANDO EL ROUTER!
+  searchStore.performSearch(router); 
 };
 
-// --- Tu código de depuración existente (actualizado) ---
 const performAndLogSearch = () => {
   console.log('Texto de búsqueda:', searchStore.searchText);
-  // Asegúrate de pasar el router si usas esta función de depuración también
   searchStore.performSearch(router); 
   console.log('Resultados de búsqueda después de performSearch:', searchStore.searchResults);
   console.log('¿Está cargando la búsqueda?', searchStore.loading);

@@ -51,7 +51,6 @@ export const useSearchStore = defineStore('search', {
       this.searchText = '';
       this.searchResults = [];
       this.error = null;
-      console.log('Pinia: Search state cleared.');
     }
   },
   getters: {
