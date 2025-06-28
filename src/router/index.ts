@@ -25,21 +25,21 @@ const routes = [
   },
   {
     path: '/movie/:id',
-    name: 'Movie_Details',
+    name: 'Movie_Details', // <--- ¡Aquí está la clave!
     component: MovieDetails,
     props: true
   },
   {
-  path: '/tv/:id',
-  name: 'Show_Details', 
-  component: ShowDetails,
-  props: true
-},
- {
-    path: '/search', 
+    path: '/tv/:id',
+ name: 'Show_Details', // <--- ¡Aquí está la clave para las series!
+ component: ShowDetails,
+ props: true
+  },
+  {
+    path: '/search',
     name: 'SearchResults',
     component: Home,
-    props: (route) => ({ query: route.query.q }), 
+    props: (route) => ({ query: route.query.q }),
   },
 ]
 

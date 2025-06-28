@@ -20,6 +20,11 @@ export const useMovieDetailsStore = defineStore('movieDetails', {
                 const data = await getMovieDetails(movieId);
 
                 this.movie = data || null;
+
+                // Aquí metes el console.log
+                console.log("Datos de la película/serie en el store:", this.movie);
+                console.log("Trailers recibidos:", this.movie.trailers); // Asegúrate de que 'trailers' sea la propiedad correcta
+
                 this.cast = extractMovieCast(data).filter(
                     (actor) => actor.image && actor.image.trim() !== ""
                 );

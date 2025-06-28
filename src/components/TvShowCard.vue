@@ -43,7 +43,8 @@ export default {
     };
 
     const goToDetails = () => {
-      router.push({ name: 'ShowDetails', params: { id: props.tvShow.id } });
+    
+      router.push({ name: 'Show_Details', params: { id: props.tvShow.id } });
     };
 
     return {

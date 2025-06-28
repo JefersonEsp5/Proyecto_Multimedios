@@ -44,8 +44,15 @@ export default {
     };
 
     const goToDetails = () => {
-      router.push({ name: 'MovieDetails', params: { id: props.movie.id } });
-    };
+  console.log('Clic en película:', props.movie.title || props.movie.name);
+  console.log('ID de película:', props.movie.id); 
+  if (props.movie.id) {
+    // CAMBIO AQUÍ: Asegúrate de que el nombre de la ruta coincida
+    router.push({ name: 'Movie_Details', params: { id: props.movie.id } }); 
+  } else {
+    console.error('Error: El ID de la película es undefined o null. No se puede navegar.');
+  }
+};
 
     return {
       posterUrl,
