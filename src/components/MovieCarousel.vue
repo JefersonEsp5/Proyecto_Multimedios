@@ -1,23 +1,29 @@
 <template>
   <div class="app">
-    <!-- Vista principal del carrusel -->
     <div v-if="!showAllMovies" class="carousel-container">
       <div class="carousel-header">
         <h2>Películas recomendadas</h2>
         <button class="see-all-btn" @click="toggleShowAll">
           <span>Ver todo</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
         </button>
       </div>
-      
-      <div class="carousel" ref="carouselRef">
+
+      <div v-if="mediaStore.loadingMovies" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Cargando películas...</p>
+      </div>
+
+      <div v-else-if="mediaStore.errorMovies" class="error-message">
+        {{ mediaStore.errorMovies }}
+      </div>
+
+      <div v-else class="carousel" ref="carouselRef">
         <div class="carousel-content" :style="{ transform: `translateX(-${scrollPosition}px)` }">
-          <div 
-            v-for="movie in limitedMovies" 
-            :key="movie.id" 
-            class="movie-card"
-            @click="selectMovie(movie)"
-          >
+          <div v-for="movie in limitedMovies" :key="movie.id" class="movie-card" @click="selectMovie(movie)">
             <div class="movie-poster">
               <div class="rating">{{ movie.rating }}</div>
               <img :src="movie.poster" :alt="movie.title" @error="setDefaultPoster" />
@@ -26,42 +32,46 @@
             <div class="movie-year">{{ movie.year }}</div>
           </div>
         </div>
-        
-        <button 
-          class="nav-button prev" 
-          @click="scroll('prev')" 
-          :class="{ 'hidden': scrollPosition <= 0 }"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+
+        <button class="nav-button prev" @click="scroll('prev')" :class="{ 'hidden': scrollPosition <= 0 }">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
         </button>
-        
-        <button 
-          class="nav-button next" 
-          @click="scroll('next')" 
-          :class="{ 'hidden': scrollPosition >= maxScroll }"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+
+        <button class="nav-button next" @click="scroll('next')" :class="{ 'hidden': scrollPosition >= maxScroll }">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
         </button>
       </div>
     </div>
 
-    <!-- Vista de "Ver todo" -->
     <div v-else class="all-movies-container">
       <div class="carousel-header">
         <h2>Todas las películas</h2>
         <button class="see-all-btn" @click="toggleShowAll">
           <span>Volver</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
         </button>
       </div>
-      
-      <div class="movies-grid">
-        <div 
-          v-for="movie in limitedMovies" 
-          :key="movie.id" 
-          class="movie-card grid-card"
-          @click="selectMovie(movie)"
-        >
+
+      <div v-if="mediaStore.loadingMovies" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Cargando películas...</p>
+      </div>
+
+      <div v-else-if="mediaStore.errorMovies" class="error-message">
+        {{ mediaStore.errorMovies }}
+      </div>
+
+      <div v-else class="movies-grid">
+        <div v-for="movie in allMovies" :key="movie.id" class="movie-card grid-card" @click="selectMovie(movie)">
           <div class="movie-poster">
             <div class="rating">{{ movie.rating }}</div>
             <img :src="movie.poster" :alt="movie.title" @error="setDefaultPoster" />
@@ -76,97 +86,92 @@
   </div>
 </template>
 
-<script>
-import { getPopularMovies } from "@/services/tvdb";
+<script setup>
+import { ref, computed, onMounted, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
+import { useMediaStore } from '@/storages/mediaStore'; // Importa tu store de Pinia
 
+// Inicializa el router
+const router = useRouter();
 
-export default {
-  name: 'MoviesCarousel',
-  props: {
-    maxItems: {
-      type: Number,
-      default: 20
-    },
-    carouselItems: {
-      type: Number,
-      default: 10
-    }
+// Inicializa el store de Pinia
+const mediaStore = useMediaStore();
+
+// Props (sin cambios)
+const props = defineProps({
+  maxItems: {
+    type: Number,
+    default: 20
   },
- 
-  methods: {
-    selectMovie(movie) {
-      this.$emit('movie-selected', movie)
-    }
-  },
-  data() {
-    return {
-      scrollPosition: 0,
-      maxScroll: 0,
-      scrollAmount: 200,
-      showAllMovies: false,
-      movies: [],
-      loading: true,
-      error: null
-    };
-  },
-  computed: {
-    limitedMovies() {
-      return this.showAllMovies 
-        ? this.movies.slice(0, this.maxItems)
-        : this.movies.slice(0, this.carouselItems);
-    }
-  },
-  async mounted() {
-    try {
-      const movies = await getPopularMovies();
-      this.movies = movies
-        .filter(movie => movie.poster && movie.poster.includes('artworks.thetvdb.com'))
-        .slice(0, this.maxItems + 10);
-      
-      this.$nextTick(() => {
-        this.updateMaxScroll();
-      });
-    } catch (error) {
-      console.error("Error al cargar películas:", error);
-      this.error = "No se pudieron cargar las películas. Intenta de nuevo más tarde.";
-    } finally {
-      this.loading = false;
-    }
-  },
-  methods: {
-    updateMaxScroll() {
-      if (!this.$refs.carouselRef) return;
-      
-      const containerWidth = this.$refs.carouselRef.clientWidth;
-      const contentWidth = this.$refs.carouselRef.querySelector('.carousel-content').scrollWidth;
-      this.maxScroll = Math.max(0, contentWidth - containerWidth);
-    },
-    scroll(direction) {
-      if (direction === 'next') {
-        this.scrollPosition = Math.min(this.scrollPosition + this.scrollAmount, this.maxScroll);
-      } else {
-        this.scrollPosition = Math.max(this.scrollPosition - this.scrollAmount, 0);
-      }
-    },
-    
-    selectMovie(movie) {
-  this.$router.push({ name: 'Movie_Details', params: { id: movie.id } });
-},
-    toggleShowAll() {
-      this.showAllMovies = !this.showAllMovies;
-      if (!this.showAllMovies) {
-        this.scrollPosition = 0;
-        this.$nextTick(() => {
-          this.updateMaxScroll();
-        });
-      }
-    },
-    setDefaultPoster(event) {
-      event.target.src = 'https://via.placeholder.com/300x450?text=No+Poster';
-      event.target.classList.add('error-poster');
-    }
+  carouselItems: {
+    type: Number,
+    default: 10
   }
-}
+});
+
+// Estado local del componente
+const scrollPosition = ref(0);
+const maxScroll = ref(0);
+const scrollAmount = 200;
+const showAllMovies = ref(false); // Ahora es un ref para Composition API
+const carouselRef = ref(null); // Referencia al elemento del carrusel
+
+// Computed properties
+const limitedMovies = computed(() => {
+  return mediaStore.popularMovies.slice(0, props.carouselItems);
+});
+
+const allMovies = computed(() => {
+  return mediaStore.popularMovies.slice(0, props.maxItems);
+});
+
+
+// Métodos
+const updateMaxScroll = () => {
+  if (!carouselRef.value) return;
+
+  const containerWidth = carouselRef.value.clientWidth;
+  const contentWidth = carouselRef.value.querySelector('.carousel-content').scrollWidth;
+  maxScroll.value = Math.max(0, contentWidth - containerWidth);
+};
+
+const scroll = (direction) => {
+  if (direction === 'next') {
+    scrollPosition.value = Math.min(scrollPosition.value + scrollAmount, maxScroll.value);
+  } else {
+    scrollPosition.value = Math.max(scrollPosition.value - scrollAmount, 0);
+  }
+};
+
+const selectMovie = (movie) => {
+  router.push({ name: 'Movie_Details', params: { id: movie.id } });
+};
+
+const toggleShowAll = () => {
+  showAllMovies.value = !showAllMovies.value;
+  if (!showAllMovies.value) {
+    scrollPosition.value = 0;
+    nextTick(() => {
+      updateMaxScroll();
+    });
+  }
+};
+
+const setDefaultPoster = (event) => {
+  event.target.src = 'https://via.placeholder.com/300x450?text=No+Poster';
+  event.target.classList.add('error-poster');
+};
+
+// Hook de ciclo de vida
+onMounted(() => {
+  // Dispara la acción de Pinia para cargar las películas
+  mediaStore.fetchPopularMovies();
+
+  // Asegúrate de que los elementos estén renderizados antes de calcular maxScroll
+  nextTick(() => {
+    updateMaxScroll();
+  });
+});
 </script>
 
 <style scoped>
@@ -292,9 +297,6 @@ export default {
   padding: 8px 0;
 }
 
-.grid-card .movie-info {
-  padding: 8px;
-}
 
 /* Estilos del carrusel */
 .carousel {
@@ -358,33 +360,99 @@ export default {
 /* Estilos de la vista de cuadrícula */
 .movies-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 15px;
 }
 
 .grid-card {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
+
+.grid-card .movie-poster {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.grid-card .movie-info {
+  padding: 8px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.grid-card .movie-title {
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.2;
+  height: 2.4em;
+}
+
+.grid-card .movie-year {
+  margin-top: auto;
+}
+
+/* Loading y error styles */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: white;
+}
+
+.loading-spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 4px solid #ffffff;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-message {
+  color: #ff6b6b;
+  text-align: center;
+  padding: 20px;
+  background-color: rgba(255, 0, 0, 0.1);
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
 
 /* Media queries */
 @media (min-width: 480px) {
   .carousel .movie-card {
     width: 140px;
   }
-  
   .movies-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   }
-  
   .carousel-header h2 {
     font-size: 20px;
   }
-  
   .nav-button {
     width: 36px;
     height: 36px;
   }
-  
   .carousel-content {
     gap: 12px;
   }
@@ -394,26 +462,21 @@ export default {
   .app {
     padding: 15px;
   }
-  
   .carousel .movie-card {
     width: 160px;
   }
-  
   .movies-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 20px;
   }
-  
   .nav-button {
     width: 40px;
     height: 40px;
   }
-  
   .nav-button svg {
     width: 20px;
     height: 20px;
   }
-  
   .carousel-content {
     gap: 15px;
   }
@@ -423,19 +486,15 @@ export default {
   .app {
     padding: 20px;
   }
-  
   .carousel .movie-card {
     width: 180px;
   }
-  
   .movies-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
-  
   .carousel-header h2 {
     font-size: 22px;
   }
-  
   .carousel-content {
     gap: 16px;
   }
@@ -443,7 +502,7 @@ export default {
 
 @media (min-width: 1280px) {
   .movies-grid {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 }
 </style>

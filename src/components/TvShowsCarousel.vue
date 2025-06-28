@@ -1,6 +1,5 @@
 <template>
   <div class="app">
-    <!-- Vista principal del carrusel -->
     <div v-if="!showAllShows" class="carousel-container">
       <div class="carousel-header">
         <h2>Series de TV populares</h2>
@@ -13,13 +12,13 @@
         </button>
       </div>
 
-      <div v-if="loading" class="loading-container">
+      <div v-if="mediaStore.loadingTvShows" class="loading-container">
         <div class="loading-spinner"></div>
         <p>Cargando series...</p>
       </div>
 
-      <div v-else-if="error" class="error-message">
-        {{ error }}
+      <div v-else-if="mediaStore.errorTvShows" class="error-message">
+        {{ mediaStore.errorTvShows }}
       </div>
 
       <div v-else class="carousel" ref="carouselRef">
@@ -50,7 +49,6 @@
       </div>
     </div>
 
-    <!-- Vista de "Ver todo" -->
     <div v-else class="all-shows-container">
       <div class="carousel-header">
         <h2>Todas las series</h2>
@@ -63,17 +61,17 @@
         </button>
       </div>
 
-      <div v-if="loading" class="loading-container">
+      <div v-if="mediaStore.loadingTvShows" class="loading-container">
         <div class="loading-spinner"></div>
         <p>Cargando series...</p>
       </div>
 
-      <div v-else-if="error" class="error-message">
-        {{ error }}
+      <div v-else-if="mediaStore.errorTvShows" class="error-message">
+        {{ mediaStore.errorTvShows }}
       </div>
 
       <div v-else class="shows-grid">
-        <div v-for="show in limitedShows" :key="show.id" class="show-card grid-card" @click="selectShow(show)">
+        <div v-for="show in allShows" :key="show.id" class="show-card grid-card" @click="selectShow(show)">
           <div class="show-poster">
             <div class="rating">{{ show.rating }}</div>
             <img :src="show.poster" :alt="show.title" @error="setDefaultPoster" />
@@ -88,90 +86,92 @@
   </div>
 </template>
 
-<script>
-import { getPopularSeries } from "@/services/tvdb";
+<script setup>
+import { ref, computed, onMounted, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
+import { useMediaStore } from '@/storages/mediaStore'; // Importa tu store de Pinia
 
-export default {
-  name: 'TvShowsCarousel',
-  props: {
-    maxItems: {
-      type: Number,
-      default: 20
-    },
-    carouselItems: {
-      type: Number,
-      default: 10
-    }
-  },
-  data() {
-    return {
-      scrollPosition: 0,
-      maxScroll: 0,
-      scrollAmount: 200,
-      showAllShows: false,
-      tvShows: [],
-      loading: true,
-      error: null
-    };
-  },
-  computed: {
-    limitedShows() {
-      return this.showAllShows
-        ? this.tvShows.slice(0, this.maxItems)
-        : this.tvShows.slice(0, this.carouselItems);
-    }
-  },
-  async mounted() {
-    try {
-      const shows = await getPopularSeries();
-      this.tvShows = shows
-        .filter(show => show.poster && show.poster.includes('artworks.thetvdb.com'))
-        .slice(0, this.maxItems + 10);
+// Inicializa el router
+const router = useRouter();
 
-      this.$nextTick(() => {
-        this.updateMaxScroll();
-      });
-    } catch (error) {
-      console.error("Error al cargar series:", error);
-      this.error = "No se pudieron cargar las series. Intenta de nuevo más tarde.";
-    } finally {
-      this.loading = false;
-    }
-  },
-  methods: {
-    updateMaxScroll() {
-      if (!this.$refs.carouselRef) return;
+// Inicializa el store de Pinia
+const mediaStore = useMediaStore();
 
-      const containerWidth = this.$refs.carouselRef.clientWidth;
-      const contentWidth = this.$refs.carouselRef.querySelector('.carousel-content').scrollWidth;
-      this.maxScroll = Math.max(0, contentWidth - containerWidth);
-    },
-    scroll(direction) {
-      if (direction === 'next') {
-        this.scrollPosition = Math.min(this.scrollPosition + this.scrollAmount, this.maxScroll);
-      } else {
-        this.scrollPosition = Math.max(this.scrollPosition - this.scrollAmount, 0);
-      }
-    },
-   
-    selectShow(show) {
-      this.$router.push({ name: 'Show_Details', params: { id: show.id.toString() } });
-    },
-    toggleShowAll() {
-      this.showAllShows = !this.showAllShows;
-      if (!this.showAllShows) {
-        this.scrollPosition = 0;
-        this.$nextTick(() => {
-          this.updateMaxScroll();
-        });
-      }
-    },
-    setDefaultPoster(event) {
-      event.target.src = 'https://via.placeholder.com/300x450?text=No+Poster';
-      event.target.classList.add('error-poster');
-    }
+// Props (sin cambios)
+const props = defineProps({
+  maxItems: {
+    type: Number,
+    default: 20
+  },
+  carouselItems: {
+    type: Number,
+    default: 10
   }
-}
+});
+
+// Estado local del componente
+const scrollPosition = ref(0);
+const maxScroll = ref(0);
+const scrollAmount = 200;
+const showAllShows = ref(false); // Ahora es un ref
+const carouselRef = ref(null); // Referencia al elemento del carrusel
+
+// Computed properties
+const limitedShows = computed(() => {
+  return mediaStore.popularTvShows.slice(0, props.carouselItems);
+});
+
+const allShows = computed(() => {
+  return mediaStore.popularTvShows.slice(0, props.maxItems);
+});
+
+
+// Métodos
+const updateMaxScroll = () => {
+  if (!carouselRef.value) return;
+
+  const containerWidth = carouselRef.value.clientWidth;
+  const contentWidth = carouselRef.value.querySelector('.carousel-content').scrollWidth;
+  maxScroll.value = Math.max(0, contentWidth - containerWidth);
+};
+
+const scroll = (direction) => {
+  if (direction === 'next') {
+    scrollPosition.value = Math.min(scrollPosition.value + scrollAmount, maxScroll.value);
+  } else {
+    scrollPosition.value = Math.max(scrollPosition.value - scrollAmount, 0);
+  }
+};
+
+const selectShow = (show) => {
+  router.push({ name: 'Show_Details', params: { id: show.id.toString() } });
+};
+
+const toggleShowAll = () => {
+  showAllShows.value = !showAllShows.value;
+  if (!showAllShows.value) {
+    scrollPosition.value = 0;
+    nextTick(() => {
+      updateMaxScroll();
+    });
+  }
+};
+
+const setDefaultPoster = (event) => {
+  event.target.src = 'https://via.placeholder.com/300x450?text=No+Poster';
+  event.target.classList.add('error-poster');
+};
+
+// Hook de ciclo de vida
+onMounted(() => {
+  // Dispara la acción de Pinia para cargar las series
+  mediaStore.fetchPopularTvShows();
+
+  // Asegúrate de que los elementos estén renderizados antes de calcular maxScroll
+  nextTick(() => {
+    updateMaxScroll();
+  });
+});
 </script>
 
 <style scoped>
@@ -298,9 +298,6 @@ export default {
   padding: 8px 0;
 }
 
-.grid-card .show-info {
-  padding: 8px;
-}
 
 /* Estilos del carrusel */
 .carousel {
@@ -364,12 +361,43 @@ export default {
 /* Estilos de la vista de cuadrícula */
 .shows-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 15px;
 }
 
 .grid-card {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.grid-card .show-poster {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.grid-card .show-info {
+  padding: 8px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.grid-card .show-title {
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.2;
+  height: 2.4em;
+}
+
+.grid-card .show-year {
+  margin-top: auto;
 }
 
 /* Loading y error styles */
@@ -396,7 +424,6 @@ export default {
   0% {
     transform: rotate(0deg);
   }
-
   100% {
     transform: rotate(360deg);
   }
@@ -416,20 +443,16 @@ export default {
   .carousel .show-card {
     width: 140px;
   }
-
   .shows-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   }
-
   .carousel-header h2 {
     font-size: 20px;
   }
-
   .nav-button {
     width: 36px;
     height: 36px;
   }
-
   .carousel-content {
     gap: 12px;
   }
@@ -439,26 +462,21 @@ export default {
   .app {
     padding: 15px;
   }
-
   .carousel .show-card {
     width: 160px;
   }
-
   .shows-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 20px;
   }
-
   .nav-button {
     width: 40px;
     height: 40px;
   }
-
   .nav-button svg {
     width: 20px;
     height: 20px;
   }
-
   .carousel-content {
     gap: 15px;
   }
@@ -468,19 +486,15 @@ export default {
   .app {
     padding: 20px;
   }
-
   .carousel .show-card {
     width: 180px;
   }
-
   .shows-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
-
   .carousel-header h2 {
     font-size: 22px;
   }
-
   .carousel-content {
     gap: 16px;
   }
@@ -488,7 +502,7 @@ export default {
 
 @media (min-width: 1280px) {
   .shows-grid {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 }
 </style>
