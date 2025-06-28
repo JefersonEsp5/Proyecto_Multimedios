@@ -159,7 +159,7 @@ function extractSeriesCast(seriesDetails) {
     id: character.id,
     name: character.personName || 'Desconocido',
     role: character.name || 'Sin rol definido',
-    image: buildImageUrl(character.personImgURL) || 'https://placehold.co/100x140?text=No+Image' // ¡CAMBIO AQUÍ!
+    image:character.personImgURL || null
   })).filter(actor => actor.image);
 }
 
