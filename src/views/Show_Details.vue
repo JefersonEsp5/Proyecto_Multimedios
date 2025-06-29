@@ -20,7 +20,8 @@
           <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" class="imdb-logo"
             alt="IMDb" />
           <span class="rating">{{ store.tvShow.rating || 'N/A' }}</span>
-          <span class="details">• {{ store.tvShow.year || 'Desconocido' }} • {{ store.tvShow.runtime || 'No disponible' }}
+          <span class="details">• {{ store.tvShow.year || 'Desconocido' }} • {{ store.tvShow.runtime || 'No disponible'
+          }}
             minutos</span>
         </div>
         <div class="genres">
@@ -77,41 +78,70 @@
             </template>
           </GenericCarousel>
         </div>
-
-        <div class="episode-info-section" v-if="store.hasEpisodeInfo">
-          <h3>Próximo Episodio</h3>
-          <div class="next-episode-card" v-if="store.nextEpisode">
-            <i class="fas fa-calendar-alt episode-icon"></i>
-            <div class="episode-details">
-              <span class="episode-date">{{ store.nextEpisode.air_date }}</span>
-              <p class="episode-title">{{ store.nextEpisode.title }}</p>
+        <!-- SECCIÓN DE PRÓXIMO EPISODIO Y TEMPORADAS -->
+        <div class="episode-info-section">
+          <h3 class="section-title">Next Episode</h3>
+          <div v-if="store.nextEpisode" class="next-episode-card">
+            <div class="episode-icon">
+              📅
             </div>
+            <div class="episode-details">
+              <div class="episode-date">{{ store.nextEpisode.air_date }}</div>
+              <div class="episode-title">
+                s{{ store.nextEpisode.season_number.toString().padStart(2, '0') }}e{{
+                  store.nextEpisode.episode_number.toString().padStart(2, '0') }},
+                {{ store.nextEpisode.title }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="seasons-section" v-if="store.tvShow.seasons && store.tvShow.seasons.length">
+          <h3 class="section-title">Seasons</h3>
+          <div v-for="season in sortedSeasons" :key="season.id" class="season-card">
+            <input type="checkbox" v-model="season.selected" class="season-checkbox" />
+            <div class="season-info" @click="store.selectSeason(season.number)">
+              <div class="season-title">Season {{ season.number }}</div>
+              <div class="progress-bar-container">
+                <div class="progress-bar" :style="{ width: season.progress + '%' }"></div>
+              </div>
+              <div class="episodes-count">{{ season.watched_count }} / {{ season.total_episodes }}</div>
+            </div>
+            <button class="expand-button" @click="store.toggleSeasonWatched(season)">▶</button>
+
+           
+            <div v-if="season.expanded" class="episodes-list">
+              <div v-for="episode in sortedEpisodes(season.episodes)" :key="episode.id" class="episode-card">
+                <span class="episode-number">
+                  E{{ episode.number.toString().padStart(2, '0') }}
+                </span>
+                <span class="episode-title">{{ episode.title }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="store.activeImageUrl" class="modal-overlay" @click.self="store.closeImage">
+          <div class="modal-content image-modal-content">
+            <img :src="store.activeImageUrl" alt="Imagen ampliada" />
+            <button class="close-button" @click="store.closeImage">Cerrar</button>
           </div>
         </div>
       </div>
 
-      <div v-if="store.activeImageUrl" class="modal-overlay" @click.self="store.closeImage">
-        <div class="modal-content image-modal-content">
-          <img :src="store.activeImageUrl" alt="Imagen ampliada" />
-          <button class="close-button" @click="store.closeImage">Cerrar</button>
+      <div v-if="store.activeTrailerUrl" class="modal-trailer" @click.self="store.closeTrailer">
+        <div class="modal-content">
+          <iframe width="100%" height="400"
+            :src="`https://www.youtube.com/embed/$${getYouTubeID(store.activeTrailerUrl)}?autoplay=1`" frameborder="0"
+            allow="autoplay; encrypted-media" allowfullscreen></iframe>
+          <button class="close-button" @click="store.closeTrailer">Cerrar</button>
         </div>
-      </div>
-    </div>
-
-    <div v-if="store.activeTrailerUrl" class="modal-trailer" @click.self="store.closeTrailer">
-      <div class="modal-content">
-        <iframe width="100%" height="400"
-          :src="`https://www.youtube.com/embed/$${getYouTubeID(store.activeTrailerUrl)}?autoplay=1`" frameborder="0"
-          allow="autoplay; encrypted-media" allowfullscreen></iframe>
-        <button class="close-button" @click="store.closeTrailer">Cerrar</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { useSeriesDetailsStore } from "@/storages/seriesDetails"; // Asegúrate de crear este store
-import { mapState } from 'pinia';
+import { useSeriesDetailsStore } from "@/storages/seriesDetails";
 import GenericCarousel from '@/components/GenericCarousel.vue';
 import SearchBar from '@/components/SearchBar.vue';
 
@@ -127,9 +157,10 @@ export default {
       required: true,
     },
   },
-  setup() {
-    const store = useSeriesDetailsStore();
-    return { store };
+  data() {
+    return {
+      store: useSeriesDetailsStore()
+    };
   },
   computed: {
     pageBackgroundStyle() {
@@ -145,10 +176,14 @@ export default {
         backgroundColor: '#1a1a1a',
       };
     },
-  },
-  async created() {
-    const seriesId = parseInt(this.id);
-    await this.store.fetchSeriesDetails(seriesId);
+    sortedSeasons() {
+      if (!this.store.tvShow || !this.store.tvShow.seasons) return [];
+      const uniqueSeasons = new Map();
+      this.store.tvShow.seasons.forEach(season => {
+        uniqueSeasons.set(season.number, season);
+      });
+      return Array.from(uniqueSeasons.values()).sort((a, b) => b.number - a.number);
+    },
   },
   methods: {
     getYouTubeID(url) {
@@ -157,12 +192,20 @@ export default {
       );
       return match ? match[1] : "";
     },
+    sortedEpisodes(episodes) {
+      return episodes.slice().sort((a, b) => a.number - b.number);
+    },
+  },
+  async created() {
+    const seriesId = parseInt(this.id);
+    await this.store.fetchSeriesDetails(seriesId);
   },
 };
 </script>
 
+
+
 <style scoped>
-/* Importa o copia los estilos de MovieDetail.vue aquí */
 body,
 html {
   margin: 0;
@@ -651,4 +694,137 @@ html {
     padding: 0.4rem;
   }
 }
+
+.section-title {
+  font-size: 1.25rem;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  text-align: left;
+  width: 100%;
+}
+
+.episode-info-section,
+.seasons-section {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.next-episode-card {
+  display: flex;
+  align-items: center;
+  background: #1e1e1e;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.episode-icon {
+  font-size: 1.5rem;
+  margin-right: 0.75rem;
+  color: #6366f1;
+}
+
+.episode-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.episode-date {
+  font-weight: 600;
+  color: #fff;
+}
+
+.episode-title {
+  color: #a0aec0;
+  font-size: 0.95rem;
+}
+
+.season-card {
+  display: flex;
+  align-items: center;
+  background: #1e1e1e;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.season-checkbox {
+  margin-right: 1rem;
+  transform: scale(1.2);
+}
+
+.season-info {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.season-title {
+  flex-shrink: 0;
+  font-weight: 600;
+  min-width: 80px;
+}
+
+.progress-bar-container {
+  flex-grow: 1;
+  height: 8px;
+  background: #4a5568;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #6366f1;
+  border-radius: 4px 0 0 4px;
+}
+
+.episodes-count {
+  flex-shrink: 0;
+  margin-left: 0.75rem;
+  font-size: 0.9rem;
+  color: #e2e8f0;
+}
+
+.expand-button {
+  background: none;
+  border: none;
+  color: #cbd5e0;
+  font-size: 1.25rem;
+  margin-left: 0.75rem;
+  cursor: pointer;
+}
+.episodes-list {
+  margin-top: 0.5rem;
+  background: #111;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.episode-card {
+  display: flex;
+  align-items: center;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #333;
+}
+
+.episode-card:last-child {
+  border-bottom: none;
+}
+
+.episode-number {
+  color: #facc15;
+  font-weight: bold;
+  margin-right: 0.75rem;
+}
+
+.episode-title {
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  word-break: break-word;
+}
+
 </style>
