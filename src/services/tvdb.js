@@ -72,7 +72,7 @@ async function getPopularMovies(page = 1) {
   try {
     const data = await makeAuthenticatedRequest(`/movies?page=${page}`);
 
-    // Procesamos los datos para adaptarlos a nuestra interfaz
+
     return data.data.map(movie => ({
       id: movie.id,
       title: movie.name,
@@ -91,7 +91,7 @@ async function getPopularMovies(page = 1) {
 async function getMovieDetails(movieId) {
   try {
     const data = await makeAuthenticatedRequest(`/movies/${movieId}/extended`);
-    console.log("Datos completos de la película:", data); // Agrega esta línea para registrar los datos
+    console.log("Datos completos de la película:", data);
     return data.data;
   } catch (error) {
     console.error("Error al obtener detalles de la película:", error);
@@ -102,19 +102,43 @@ async function getMovieDetails(movieId) {
 // Obtener reparto de una película
 function extractMovieCast(movieDetails) {
   if (!movieDetails.characters) return [];
-  return movieDetails.characters.map(character => ({
+  return movieDetails.characters
+    .filter(character => character.peopleType === 'Actor') // Filtrar solo actores
+    .map(character => ({
     id: character.id,
+    peopleId: character.peopleId, // Agregado
     name: character.personName || 'Desconocido',
     role: character.name || 'Sin rol definido',
-    image: character.personImgURL || null
+    image: character.personImgURL || 'https://placehold.co/100x140',
+    peopleType: character.peopleType, // Agregado
+    isFeatured: character.isFeatured, // Agregado
+    url: character.url // Agregado
   }));
 }
 function extractMovieCreators(movieDetails) {
-  if (!movieDetails.companies || !movieDetails.companies.production) return [];
-  return movieDetails.companies.production.map(company => ({
-    id: company.id,
-    name: company.name
-  }));
+  let creators = [];
+
+  if (movieDetails.characters) {
+    const writers = movieDetails.characters
+      .filter(character => character.peopleType === 'Writer')
+      .map(writer => ({
+        id: writer.peopleId,
+        name: writer.personName || 'Desconocido',
+        type: 'Writer'
+      }));
+    creators = creators.concat(writers);
+
+    const producers = movieDetails.characters
+      .filter(character => character.peopleType === 'Producer')
+      .map(producer => ({
+        id: producer.peopleId,
+        name: producer.personName || 'Desconocido',
+        type: 'Producer'
+      }));
+    creators = creators.concat(producers);
+  }
+
+  return creators;
 }
 // Obtener series populares
 async function getPopularSeries(page = 1, limit = 30) {
@@ -151,16 +175,35 @@ async function getSeriesDetails(seriesId) {
     return null;
   }
 }
-
+export async function getSeasonEpisodes(seriesId, seasonNumber) {
+  try {
+    const response = await makeAuthenticatedRequest(`/series/${seriesId}/episodes/query?season_number=${seasonNumber}`);
+    if (response.status === 'success' && response.data) {
+      // TheTVDB API v4 for episodes usually returns an array of episode objects
+      // You might need to adjust this based on the exact structure of the 'data' field
+      return response.data.episodes || []; // Assuming 'data' contains an 'episodes' array
+    }
+    return [];
+  } catch (error) {
+    console.error(`TVDB Service: Error fetching episodes for series ${seriesId}, season ${seasonNumber}:`, error);
+    throw new Error(`Failed to fetch season episodes: ${error.message}`);
+  }
+}
 // Nuevas funciones para extraer reparto y creadores de series
 function extractSeriesCast(seriesDetails) {
   if (!seriesDetails.characters) return [];
-  return seriesDetails.characters.map(character => ({
+  return seriesDetails.characters
+    .filter(character => character.peopleType === 'Actor') // Filtrar solo actores
+    .map(character => ({
     id: character.id,
+    peopleId: character.peopleId, // Agregado
     name: character.personName || 'Desconocido',
     role: character.name || 'Sin rol definido',
-    image:character.personImgURL || null
-  })).filter(actor => actor.image);
+    image:character.personImgURL || 'https://placehold.co/100x140',
+    peopleType: character.peopleType, // Agregado
+    isFeatured: character.isFeatured, // Agregado
+    url: character.url // Agregado
+  }));
 }
 
 function extractSeriesCreators(seriesDetails) {
@@ -230,5 +273,6 @@ export {
   extractMovieCreators,
   extractMovieCast,
   extractSeriesCast,
-  extractSeriesCreators
+  extractSeriesCreators,
+  // getSeasonEpisodes // Removido de aquí para evitar la exportación duplicada
 };

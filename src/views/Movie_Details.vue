@@ -36,6 +36,26 @@
           <span v-else>No disponible</span>
         </p>
 
+        <div class="action-buttons-section">
+          <button class="start-watching-button">
+            Start watching
+          </button>
+          <div class="secondary-actions">
+            <div class="action-item">
+              <button class="icon-button purple">🔖</button>
+              <span>Add to watchlist</span>
+            </div>
+            <div class="action-item">
+              <button class="icon-button green">✔️</button>
+              <span>Mark as watched</span>
+            </div>
+            <div class="action-item">
+              <button class="icon-button yellow">⭐</button>
+              <span>Add to favorites</span>
+            </div>
+          </div>
+        </div>
+
         <div class="cast-section">
           <h3>Reparto principal</h3>
           <GenericCarousel :items="store.cast" :item-width="180" :scroll-amount="150">
@@ -78,16 +98,6 @@
           </GenericCarousel>
         </div>
 
-        <div class="episode-info-section" v-if="store.hasEpisodeInfo">
-          <h3>Próximo Episodio</h3>
-          <div class="next-episode-card" v-if="store.nextEpisode">
-            <i class="fas fa-calendar-alt episode-icon"></i>
-            <div class="episode-details">
-              <span class="episode-date">{{ store.nextEpisode.air_date }}</span>
-              <p class="episode-title">{{ store.nextEpisode.title }}</p>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div v-if="store.activeImageUrl" class="modal-overlay" @click.self="store.closeImage">
@@ -189,6 +199,13 @@ html {
   padding-top: 20px;
   position: relative;
   z-index: 5;
+}
+
+.no-episodes {
+  color: #a0aec0;
+  text-align: center;
+  padding: 1rem;
+  font-style: italic;
 }
 
 .search-bar {
@@ -420,8 +437,12 @@ html {
   font-size: 1.25rem;
   cursor: pointer;
   z-index: 10;
+  opacity: 0.5; 
+  transition: opacity 0.3s ease;
 }
-
+.back-button:hover {
+  opacity: 1; 
+}
 .back-button.left {
   left: 1rem;
 }
@@ -514,7 +535,7 @@ html {
   background-color: #4a5568;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
-  font-size: 0.875rem;
+  font-size: 0.877rem;
 }
 
 .overview {
@@ -528,37 +549,6 @@ html {
   font-size: 0.85rem;
   color: #a0aec0;
   margin-top: 0.5rem;
-}
-
-.watch-button {
-  width: 100%;
-  margin-top: 1.25rem;
-  padding: 0.75rem;
-  border-radius: 0.75rem;
-  background-color: #6366f1;
-  color: white;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.watch-button:hover {
-  background-color: #4f46e5;
-}
-
-.actions {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.875rem;
-  color: #cbd5e0;
-  margin-top: 1.25rem;
-}
-
-.action {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .icon {
@@ -648,33 +638,144 @@ html {
     font-size: 1.25rem;
   }
 
-  .modal-content.image-modal-content {
-    max-width: 95%;
-    max-height: 85%;
-
-  }
-
-  /* .modal-trailer .modal-content {
-    max-width: 95%; /* Un poco más de ancho en pantallas pequeñas */
-  /*  max-height: 90%; Ajusta la altura máxima */
-  /* padding: 0.5rem; /* Menos padding en móviles */
-  /* }
-
-  /* .modal-trailer .modal-content iframe {
-    height: 40vh; /* Reduce la altura relativa en móviles para que quepa mejor */
-  /*    min-height: 200px; /* Altura mínima para móviles */
-  /*  }
-
-  .modal-trailer .close-button {
-    top: 0.5rem;
-    right: 0.5rem;
-    padding: 0.3rem 0.7rem;
-    font-size: 0.8rem;
-  } */
-  
   .back-button {
     font-size: 1rem;
     padding: 0.4rem;
   }
+
+  /* Ajustes específicos para móviles en la sección de botones de acción */
+  .action-buttons-section {
+    padding: 0 1rem;
+    /* Añadir padding para que el botón no toque los bordes */
+  }
+
+  .start-watching-button {
+    font-size: 0.95rem;
+    /* Ajustar tamaño de fuente para pantallas pequeñas */
+  }
+
+  .secondary-actions {
+    flex-wrap: wrap;
+    /* Permitir que los elementos se envuelvan en pantallas pequeñas */
+    justify-content: center;
+    /* Centrar los elementos cuando se envuelvan */
+    gap: 0.75rem;
+    /* Reducir el espacio entre elementos */
+  }
+
+  .action-item {
+    min-width: 80px;
+    /* Asegurar un ancho mínimo para los elementos de acción */
+  }
+}
+
+.section-title {
+  font-size: 1.25rem;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  text-align: left;
+  width: 100%;
+}
+
+/* Nuevos estilos para la sección de botones de acción */
+.action-buttons-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1.5rem;
+  width: 100%;
+  /* Eliminar max-width de aquí */
+  padding: 0 1rem;
+  /* Añadir padding para los bordes */
+}
+
+.start-watching-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  /* Asegurar que ocupe todo el ancho disponible */
+  max-width: 400px;
+  /* Limitar el ancho máximo para pantallas grandes */
+  padding: 0.75rem 1.5rem;
+  background-color: #6a5acd;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.start-watching-button:hover {
+  background-color: #5a4aa6;
+}
+
+.start-watching-button .icon {
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.secondary-actions {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-top: 1rem;
+  gap: 1rem;
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #a0aec0;
+  flex: 1;
+}
+
+.icon-button {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-bottom: 0.4rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.icon-button:hover {
+  transform: translateY(-2px);
+}
+
+.icon-button.purple {
+  background-color: #9f7aea;
+  color: white;
+}
+
+.icon-button.green {
+  background-color: #48bb78;
+  color: white;
+}
+
+.icon-button.yellow {
+  background-color: #f6e05e;
+  color: white;
 }
 </style>
+
+
+
+
+
+Deep Research
+
+Canvas
+
+G

@@ -55,7 +55,7 @@ export const useMovieDetailsStore = defineStore('movieDetails', {
     getters: {
         filteredArtworks: (state) => {
             return state.movie && state.movie.artworks
-                ? state.movie.artworks.filter((a) => !a.includesText)
+                ? state.movie.artworks
                 : [];
         },
         hasTrailers: (state) => state.movie && state.movie.trailers && state.movie.trailers.length > 0,
