@@ -3,6 +3,7 @@ import TvShowsCarousel from '@/components/TvShowsCarousel.vue';
 import MovieCarousel from '@/components/MovieCarousel.vue';
 import MovieNavbar from '@/components/MovieNavBar.vue';
 import SearchResults from '@/views/SearchResults.vue'; // <--- NEW: Import SearchResults
+import SummaryCarousel from '@/components/SummaryCarousel.vue'
 
 import { useSearchStore } from '@/storages/search.js'; 
 
@@ -12,6 +13,8 @@ const searchStore = useSearchStore(); // <--- NEW: Initialize the search store
 <template>
   <div class="main-container">
     <MovieNavbar />
+
+    <SummaryCarousel />
     
     <div v-if="searchStore.searchText || searchStore.hasResults || searchStore.isSearching">
         <SearchResults />

@@ -82,14 +82,14 @@
                 v-if="!listsStore.watched.includes(store.tvShow.id)"
                 @click="listsStore.addToList('watched', store.tvShow.id)"
               >
-                <CheckIcon class="h-6 w-6" />
+                <EyeIcon class="h-6 w-6" />
               </button>
               <button
                 class="icon-button green"
                 v-else
                 @click="listsStore.removeFromList('watched', store.tvShow.id)"
               >
-                <XMarkIcon class="h-6 w-6" />
+                <EyeSlashIcon class="h-6 w-6" />
               </button>
               <span v-if="listsStore.watched.includes(store.tvShow.id)"
                 >Watched</span
@@ -333,6 +333,8 @@ import {
   CheckIcon,
   XMarkIcon,
   StarIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from "@heroicons/vue/24/outline";
 
 const listsStore = useListsStore();
