@@ -17,6 +17,7 @@ const watchlistImages = ref([])
 const watchedImages = ref([])
 const favoritesImages = ref([])
 
+// función genérica que intenta obtener el poster
 async function getPoster(id) {
   try {
     let data = await getSeriesDetails(id)
@@ -31,7 +32,11 @@ async function getPoster(id) {
   }
 }
 
+// ahora aseguramos esperar la carga de listas
 onMounted(async () => {
+  await listsStore.loadListsFromDb() // 👈 esto garantiza que ya tiene los datos
+
+  // ahora sí pedimos imágenes con los IDs cargados
   watchlistImages.value = await Promise.all(listsStore.watchlist.map(async id => ({
     id,
     image: await getPoster(id)
@@ -46,6 +51,7 @@ onMounted(async () => {
   })))
 })
 </script>
+
 
 <template>
   <div class="summary-carousel">
