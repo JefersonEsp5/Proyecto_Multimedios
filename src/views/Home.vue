@@ -3,7 +3,7 @@ import TvShowsCarousel from '@/components/TvShowsCarousel.vue';
 import MovieCarousel from '@/components/MovieCarousel.vue';
 import MovieNavbar from '@/components/MovieNavBar.vue';
 import SearchResults from '@/views/SearchResults.vue'; // <--- NEW: Import SearchResults
-import SummaryCarousel from '@/components/SummaryCarousel.vue'
+import SummaryCarousel from '@/components/SummaryCarousel.vue';
 
 import { useSearchStore } from '@/storages/search.js'; 
 
