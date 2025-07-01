@@ -2,13 +2,16 @@
 import Home from './views/Home.vue'
 import { onMounted } from 'vue';
 import { useUserStore } from './storages/user';
+import { useListsStore } from '@/storages/lists'
 import { RouterView } from 'vue-router'; // For routing
 import MobileBottomNav from '@/components/MobileBottomNav.vue'
 
 const userStore = useUserStore();
+const listsStore = useListsStore();
 
 onMounted(() => {
     userStore.initializeUser();
+    listsStore.loadListsFromDb();
 });
 
 </script>
