@@ -11,19 +11,19 @@
       :class="['nav-item', { active: activeLink === 'peliculas' }]"
       @click="setActive('peliculas')"
     >
-      <a href="#" class="nav-link" @click.prevent="navigate('peliculas')">Películas</a>
+      <a href="#" class="nav-link" @click.prevent="navigate('Movies')">Películas</a>
     </li>
-    <li
+    <!-- <li
       :class="['nav-item', { active: activeLink === 'generos' }]"
       @click="setActive('generos')"
     >
       <a href="#" class="nav-link" @click.prevent="navigate('generos')">Géneros</a>
-    </li>
+    </li> -->
     <li
       :class="['nav-item', { active: activeLink === 'series' }]"
       @click="setActive('series')"
     >
-      <a href="#" class="nav-link" @click.prevent="navigate('series')">Series</a>
+      <a href="#" class="nav-link" @click.prevent="navigate('TvShows')">Series</a>
     </li>
   </ul>
 </template>
@@ -61,6 +61,7 @@ export default {
 .nav-links {
   list-style: none;
   display: flex;
+  flex-direction: row;
   margin: 0;
   padding: 0;
   gap: 25px;
@@ -108,7 +109,7 @@ export default {
 /* Móvil */
 @media (max-width: 768px) {
   .nav-links {
-    flex-direction: column;
+    flex-direction: row;
     gap: 15px;
     align-items: flex-start;
     width: 100%;
