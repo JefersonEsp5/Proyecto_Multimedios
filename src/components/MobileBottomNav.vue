@@ -1,10 +1,18 @@
 <template>
   <div class="bottom-nav">
-    <div class="nav-item">
+    <div 
+      class="nav-item" 
+      :class="{ active: route.path === '/' }" 
+      @click="goTo('/')"
+    >
       <v-icon name="bi-compass" scale="1.2" />
       <span>Explore</span>
     </div>
-    <div class="nav-item active">
+    <div 
+      class="nav-item" 
+      :class="{ active: route.path === '/my-shows' }"
+      @click="goTo('/my-shows')"
+    >
       <v-icon name="bi-collection-play" scale="1.2" />
       <span>My shows</span>
     </div>
@@ -20,7 +28,16 @@
 </template>
 
 <script setup>
-// no necesita nada porque usamos <v-icon> global
+import { useRouter, useRoute } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
+
+function goTo(path) {
+  if (route.path !== path) {
+    router.push(path)
+  }
+}
 </script>
 
 <style scoped>
@@ -46,6 +63,7 @@
   align-items: center;
   color: #aaa;
   font-size: 0.8rem;
+  cursor: pointer;
 }
 
 .nav-item.active {

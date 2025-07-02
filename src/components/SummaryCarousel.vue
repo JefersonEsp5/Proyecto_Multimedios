@@ -121,13 +121,13 @@ onMounted(async () => {
   justify-content: center;
 }
 .summary-card {
-  flex: 0 0 250px;
+  flex: 0 0 150px;
   border-radius: 8px;
   padding: 0.5rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 300px;
+  height: 200px;
 }
 .card-content {
   flex-grow: 1;
