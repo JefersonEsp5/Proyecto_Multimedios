@@ -19,24 +19,14 @@
         <div class="tag">TV-Serie</div>
         <h1 class="title">{{ store.tvShow.name }}</h1>
         <div class="rating-row">
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg"
-            class="imdb-logo"
-            alt="IMDb"
-          />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" class="imdb-logo"
+            alt="IMDb" />
           <span class="rating">{{ store.tvShow.rating || "N/A" }}</span>
-          <span class="details"
-            >• {{ store.tvShow.year || "Desconocido" }} •
-            {{ store.tvShow.runtime || "No disponible" }} minutos</span
-          >
+          <span class="details">• {{ store.tvShow.year || "Desconocido" }} •
+            {{ store.tvShow.runtime || "No disponible" }} minutos</span>
         </div>
         <div class="genres">
-          <span
-            v-for="genre in store.tvShow.genres"
-            :key="genre.id"
-            class="genre-tag"
-            >{{ genre.name }}</span
-          >
+          <span v-for="genre in store.tvShow.genres" :key="genre.id" class="genre-tag">{{ genre.name }}</span>
         </div>
         <p class="overview">
           {{ store.tvShow.overview || "No hay descripción disponible." }}
@@ -45,7 +35,7 @@
         <p class="creators">
           Creadores:
           <span v-if="store.creators && store.creators.length > 0">
-            {{ store.creators.map((c) => c.name).join(", ") }}
+            {{store.creators.map((c) => c.name).join(", ")}}
           </span>
           <span v-else>No disponible</span>
         </p>
@@ -56,65 +46,40 @@
           </button>
           <div class="secondary-actions">
             <div class="action-item">
-              <button
-                class="icon-button purple"
-                v-if="!listsStore.watchlist.includes(store.tvShow.id)"
-                @click="listsStore.addToList('watchlist', store.tvShow.id)"
-              >
+              <button class="icon-button purple" v-if="!listsStore.watchlist.includes(store.tvShow.id)"
+                @click="listsStore.addToList('watchlist', store.tvShow.id)">
                 <BookmarkIcon class="h-6 w-6" />
               </button>
-              <button
-                class="icon-button purple"
-                v-else
-                @click="listsStore.removeFromList('watchlist', store.tvShow.id)"
-              >
+              <button class="icon-button purple" v-else
+                @click="listsStore.removeFromList('watchlist', store.tvShow.id)">
                 <BookmarkSlashIcon class="h-6 w-6" />
               </button>
-              <span v-if="listsStore.watchlist.includes(store.tvShow.id)"
-                >In Watchlist</span
-              >
+              <span v-if="listsStore.watchlist.includes(store.tvShow.id)">In Watchlist</span>
               <span v-else>Add to Watchlist</span>
             </div>
 
             <div class="action-item">
-              <button
-                class="icon-button green"
-                v-if="!listsStore.watched.includes(store.tvShow.id)"
-                @click="listsStore.addToList('watched', store.tvShow.id)"
-              >
+              <button class="icon-button green" v-if="!listsStore.watched.includes(store.tvShow.id)"
+                @click="listsStore.addToList('watched', store.tvShow.id)">
                 <EyeIcon class="h-6 w-6" />
               </button>
-              <button
-                class="icon-button green"
-                v-else
-                @click="listsStore.removeFromList('watched', store.tvShow.id)"
-              >
+              <button class="icon-button green" v-else @click="listsStore.removeFromList('watched', store.tvShow.id)">
                 <EyeSlashIcon class="h-6 w-6" />
               </button>
-              <span v-if="listsStore.watched.includes(store.tvShow.id)"
-                >Watched</span
-              >
+              <span v-if="listsStore.watched.includes(store.tvShow.id)">Watched</span>
               <span v-else>Mark as Watched</span>
             </div>
 
             <div class="action-item">
-              <button
-                class="icon-button yellow"
-                v-if="!listsStore.favorites.includes(store.tvShow.id)"
-                @click="listsStore.addToList('favorites', store.tvShow.id)"
-              >
+              <button class="icon-button yellow" v-if="!listsStore.favorites.includes(store.tvShow.id)"
+                @click="listsStore.addToList('favorites', store.tvShow.id)">
                 <StarIcon class="h-6 w-6" />
               </button>
-              <button
-                class="icon-button yellow"
-                v-else
-                @click="listsStore.removeFromList('favorites', store.tvShow.id)"
-              >
+              <button class="icon-button yellow" v-else
+                @click="listsStore.removeFromList('favorites', store.tvShow.id)">
                 <XMarkIcon class="h-6 w-6" />
               </button>
-              <span v-if="listsStore.favorites.includes(store.tvShow.id)"
-                >In Favorites</span
-              >
+              <span v-if="listsStore.favorites.includes(store.tvShow.id)">In Favorites</span>
               <span v-else>Add to Favorites</span>
             </div>
           </div>
@@ -122,21 +87,12 @@
 
         <div class="cast-section">
           <h3>Reparto principal</h3>
-          <GenericCarousel
-            :items="store.cast"
-            :item-width="180"
-            :scroll-amount="150"
-          >
+          <GenericCarousel :items="store.cast" :item-width="180" :scroll-amount="150">
             <template #item="{ item: actor }">
               <div class="cast-card">
-                <img
-                  class="actor-img"
-                  :src="
-                    actor.image ||
-                    'https://via.placeholder.com/100x140?text=No+Image'
-                  "
-                  :alt="actor.name"
-                />
+                <img class="actor-img" :src="actor.image ||
+                  'https://via.placeholder.com/100x140?text=No+Image'
+                  " :alt="actor.name" />
                 <div class="actor-info">
                   <p class="actor-name">{{ actor.name }}</p>
                   <p class="actor-role">
@@ -150,20 +106,13 @@
 
         <div class="trailers-section" v-if="store.hasTrailers">
           <h3>Trailers</h3>
-          <GenericCarousel
-            :items="store.tvShow.trailers"
-            :item-width="320"
-            :scroll-amount="320"
-          >
+          <GenericCarousel :items="store.tvShow.trailers" :item-width="320" :scroll-amount="320">
             <template #item="{ item: trailer }">
               <div class="trailer-card" @click="store.openTrailer(trailer.url)">
                 <div class="trailer-thumbnail">
-                  <img
-                    :src="`https://img.youtube.com/vi/${getYouTubeID(
-                      trailer.url
-                    )}/mqdefault.jpg`"
-                    alt="Trailer thumbnail"
-                  />
+                  <img :src="`https://img.youtube.com/vi/${getYouTubeID(
+                    trailer.url
+                  )}/mqdefault.jpg`" alt="Trailer thumbnail" />
                 </div>
                 <p class="trailer-name">{{ trailer.name }}</p>
               </div>
@@ -173,22 +122,15 @@
 
         <div class="images-section" v-if="store.hasArtworks">
           <h3>Imágenes</h3>
-          <GenericCarousel
-            :items="store.filteredArtworks"
-            :item-width="160"
-            :scroll-amount="160"
-          >
+          <GenericCarousel :items="store.filteredArtworks" :item-width="160" :scroll-amount="160">
             <template #item="{ item: artwork, index }">
               <div class="image-card" @click="store.openImage(artwork.image)">
-                <img
-                  :src="artwork.thumbnail || artwork.image"
-                  :alt="`Imagen ${index + 1}`"
-                  class="image-thumb"
-                />
+                <img :src="artwork.thumbnail || artwork.image" :alt="`Imagen ${index + 1}`" class="image-thumb" />
               </div>
             </template>
           </GenericCarousel>
         </div>
+
         <div class="episode-info-section">
           <h3 class="section-title">Próximo Episodio</h3>
           <div v-if="store.isSeriesEnded" class="next-episode-card">
@@ -220,72 +162,53 @@
           </div>
         </div>
 
-        <div
-          class="seasons-section"
-          v-if="store.tvShow.seasons && store.tvShow.seasons.length"
-        >
+        <div class="seasons-section" v-if="store.tvShow.seasons && store.tvShow.seasons.length">
           <h3 class="section-title">Seasons</h3>
-          <div
-            v-for="season in store.sortedAndFilteredSeasons"
-            :key="season.id"
-            class="season-card-container"
-          >
+          <div v-for="season in store.sortedAndFilteredSeasons" :key="season.id" class="season-card-container">
             <div class="season-card">
-              <input
-                type="checkbox"
-                v-model="season.selected"
-                class="season-checkbox"
-              />
-              <div
-                class="season-info"
-                @click="store.toggleSeasonExpanded(season.id)"
-              >
+              <input type="checkbox" :checked="isSeasonFullyWatched(season)" @change="toggleSeasonCheckbox(season)"
+                class="season-checkbox" />
+
+              <div class="season-info" @click="store.toggleSeasonExpanded(season)">
                 <div class="season-title">Season {{ season.number }}</div>
                 <div class="progress-bar-container">
-                  <div
-                    class="progress-bar"
-                    :style="{ width: season.progress + '%' }"
-                  ></div>
+                  <div class="progress-bar" :style="{ width: getSeasonProgress(season) + '%' }"></div>
                 </div>
                 <div class="episodes-count">
-                  {{ season.watched_count }} / {{ season.total_episodes }}
+                  {{ getWatchedCount(season) }} / {{ season.episodes.length }}
                 </div>
               </div>
-              <button
-                class="expand-button"
-                @click="store.toggleSeasonWatched(season)"
-              >
+              <button class="expand-button" @click="store.toggleSeasonWatched(season)">
                 {{ season.watched_count === season.total_episodes ? "✓" : "✗" }}
               </button>
             </div>
 
             <div v-if="season.expanded" class="episodes-list">
-              <div
-                v-for="episode in sortedEpisodes(season.episodes)"
-                :key="episode.id"
-                class="episode-card"
-              >
-                <span class="episode-number">
-                  E{{ episode.number.toString().padStart(2, "0") }}
-                </span>
-                <span class="episode-title">{{ episode.title }}</span>
-              </div>
-              <div
-                v-if="!season.episodes || season.episodes.length === 0"
-                class="no-episodes"
-              >
-                Cargando episodios o no hay episodios disponibles para esta
-                temporada.
+             <div v-for="episode in sortedEpisodes(season.episodes)" :key="episode.id" class="episode-card">
+  <input type="checkbox" v-model="episode.watched" @change="updateSeasonProgress(season)" class="episode-checkbox" />
+
+  <div class="episode-title">
+    E{{ episode.number.toString().padStart(2, "0") }} - {{ episode.name }}
+    <span v-if="episode.aired" class="episode-date">
+      ({{ new Date(episode.aired).toLocaleDateString() }})
+    </span>
+  </div>
+
+  <img
+    v-if="episode.image"
+    :src="episode.image"
+    alt="Imagen del episodio"
+    class="episode-thumb"
+  />
+</div>
+              <div v-if="season.episodes.length === 0" class="no-episodes">
+                No hay episodios disponibles para esta temporada.
               </div>
             </div>
           </div>
         </div>
 
-        <div
-          v-if="store.activeImageUrl"
-          class="modal-overlay"
-          @click.self="store.closeImage"
-        >
+        <div v-if="store.activeImageUrl" class="modal-overlay" @click.self="store.closeImage">
           <div class="modal-content image-modal-content">
             <img :src="store.activeImageUrl" alt="Imagen ampliada" />
             <button class="close-button" @click="store.closeImage">
@@ -295,22 +218,11 @@
         </div>
       </div>
 
-      <div
-        v-if="store.activeTrailerUrl"
-        class="modal-trailer"
-        @click.self="store.closeTrailer"
-      >
+      <div v-if="store.activeTrailerUrl" class="modal-trailer" @click.self="store.closeTrailer">
         <div class="modal-content">
-          <iframe
-            width="100%"
-            height="400"
-            :src="`https://www.youtube.com/embed/${getYouTubeID(
-              store.activeTrailerUrl
-            )}?autoplay=1`"
-            frameborder="0"
-            allow="autoplay; encrypted-media"
-            allowfullscreen
-          ></iframe>
+          <iframe width="100%" height="400" :src="`https://www.youtube.com/embed/${getYouTubeID(
+            store.activeTrailerUrl
+          )}?autoplay=1`" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
           <button class="close-button" @click="store.closeTrailer">
             Cerrar
           </button>
@@ -377,7 +289,40 @@ const getYouTubeID = (url) => {
   return match ? match[1] : null;
 };
 
-// Método para ordenar episodios por número
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  try {
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  } catch {
+    return dateString;
+  }
+};
+function getWatchedCount(season) {
+  return season.episodes.filter(ep => ep.watched).length;
+}
+
+function getSeasonProgress(season) {
+  const total = season.episodes.length;
+  if (total === 0) return 0;
+  return Math.round((getWatchedCount(season) / total) * 100);
+}
+function isSeasonFullyWatched(season) {
+  return season.episodes.length > 0 && season.episodes.every(ep => ep.watched);
+}
+
+function toggleSeasonCheckbox(season) {
+  const markAll = !isSeasonFullyWatched(season);
+  season.episodes.forEach(ep => {
+    ep.watched = markAll;
+  });
+}
+function updateSeasonProgress(season) {
+  // For reactive updates if necessary, but not strictly required if you use computed
+}
 const sortedEpisodes = (episodes) => {
   if (!episodes) return [];
   return [...episodes].sort((a, b) => a.number - b.number);
@@ -398,12 +343,10 @@ html {
   left: 0;
   width: 100%;
   height: 250px;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.8),
-    rgba(0, 0, 0, 0.5) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(to bottom,
+      rgba(0, 0, 0, 0.8),
+      rgba(0, 0, 0, 0.5) 50%,
+      transparent 100%);
   z-index: 1;
 }
 
@@ -439,7 +382,6 @@ html {
   align-items: center;
   z-index: 1000;
 }
-
 .modal-content {
   position: relative;
   background: #000;
@@ -452,7 +394,6 @@ html {
   max-width: 90%;
   max-height: 90%;
 }
-
 .modal-content.image-modal-content {
   overflow: hidden;
   display: flex;
@@ -793,6 +734,7 @@ html {
   flex-direction: column;
   align-items: center;
 }
+
 /* Fin de antiguos estilos */
 
 .icon {
@@ -811,7 +753,43 @@ html {
 .yellow {
   color: #f6e05e;
 }
+.episode-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #ddd;
+  gap: 12px;
+}
 
+.episode-checkbox {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.episode-title {
+  flex-grow: 1;
+  text-align: center;
+  font-weight: 500;
+  font-size: 1rem;
+  color: #222;
+}
+
+.episode-date {
+  font-size: 0.85rem;
+  color: #777;
+  margin-left: 8px;
+}
+
+.episode-thumb {
+  width: 150px;
+  height: auto;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
 /*movil*/
 @media (max-width: 768px) {
   .page-container {
@@ -889,21 +867,27 @@ html {
 
   /* Ajustes específicos para móviles en la sección de botones de acción */
   .action-buttons-section {
-    padding: 0 1rem; /* Añadir padding para que el botón no toque los bordes */
+    padding: 0 1rem;
+    /* Añadir padding para que el botón no toque los bordes */
   }
 
   .start-watching-button {
-    font-size: 0.95rem; /* Ajustar tamaño de fuente para pantallas pequeñas */
+    font-size: 0.95rem;
+    /* Ajustar tamaño de fuente para pantallas pequeñas */
   }
 
   .secondary-actions {
-    flex-wrap: wrap; /* Permitir que los elementos se envuelvan en pantallas pequeñas */
-    justify-content: center; /* Centrar los elementos cuando se envuelvan */
-    gap: 0.75rem; /* Reducir el espacio entre elementos */
+    flex-wrap: wrap;
+    /* Permitir que los elementos se envuelvan en pantallas pequeñas */
+    justify-content: center;
+    /* Centrar los elementos cuando se envuelvan */
+    gap: 0.75rem;
+    /* Reducir el espacio entre elementos */
   }
 
   .action-item {
-    min-width: 80px; /* Asegurar un ancho mínimo para los elementos de acción */
+    min-width: 80px;
+    /* Asegurar un ancho mínimo para los elementos de acción */
   }
 }
 
@@ -1047,16 +1031,20 @@ html {
   flex-direction: column;
   align-items: center;
   margin-top: 1.5rem;
-  width: 100%; /* Eliminar max-width de aquí */
-  padding: 0 1rem; /* Añadir padding para los bordes */
+  width: 100%;
+  /* Eliminar max-width de aquí */
+  padding: 0 1rem;
+  /* Añadir padding para los bordes */
 }
 
 .start-watching-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%; /* Asegurar que ocupe todo el ancho disponible */
-  max-width: 400px; /* Limitar el ancho máximo para pantallas grandes */
+  width: 100%;
+  /* Asegurar que ocupe todo el ancho disponible */
+  max-width: 400px;
+  /* Limitar el ancho máximo para pantallas grandes */
   padding: 0.75rem 1.5rem;
   background-color: #6a5acd;
   color: white;

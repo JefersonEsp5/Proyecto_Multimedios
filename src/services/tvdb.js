@@ -169,6 +169,12 @@ async function getSeriesDetails(seriesId) {
   try {
     const data = await makeAuthenticatedRequest(`/series/${seriesId}/extended`);
     console.log("Datos completos de la serie:", data);
+    
+    // Verifica que los episodios estén en data.data.episodes
+    if (data.data && data.data.episodes) {
+      console.log(`Número de episodios recibidos: ${data.data.episodes.length}`);
+    }
+    
     return data.data;
   } catch (error) {
     console.error("Error al obtener detalles de la serie:", error);
@@ -177,16 +183,19 @@ async function getSeriesDetails(seriesId) {
 }
 export async function getSeasonEpisodes(seriesId, seasonNumber) {
   try {
-    const response = await makeAuthenticatedRequest(`/series/${seriesId}/episodes/query?season_number=${seasonNumber}`);
-    if (response.status === 'success' && response.data) {
-      // TheTVDB API v4 for episodes usually returns an array of episode objects
-      // You might need to adjust this based on the exact structure of the 'data' field
-      return response.data.episodes || []; // Assuming 'data' contains an 'episodes' array
+    const response = await makeAuthenticatedRequest(
+      `/series/${seriesId}/episodes/official?season=${seasonNumber}`
+    );
+    
+    console.log("Respuesta de episodios por temporada:", response);
+    
+    if (response.status === 'success' && response.data && response.data.episodes) {
+      return response.data.episodes;
     }
     return [];
   } catch (error) {
-    console.error(`TVDB Service: Error fetching episodes for series ${seriesId}, season ${seasonNumber}:`, error);
-    throw new Error(`Failed to fetch season episodes: ${error.message}`);
+    console.error(`Error fetching episodes for season ${seasonNumber}:`, error);
+    throw error;
   }
 }
 // Nuevas funciones para extraer reparto y creadores de series

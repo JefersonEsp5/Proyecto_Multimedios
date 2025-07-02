@@ -17,9 +17,11 @@
         <div class="tag">TV-Peliculas</div>
         <h1 class="title">{{ store.movie.name }}</h1>
         <div class="rating-row">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" class="imdb-logo" alt="IMDb" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" class="imdb-logo"
+            alt="IMDb" />
           <span class="rating">{{ store.movie.rating || 'N/A' }}</span>
-          <span class="details">• {{ store.movie.year || 'Desconocido' }} • {{ store.movie.runtime || 'No disponible' }} minutos</span>
+          <span class="details">• {{ store.movie.year || 'Desconocido' }} • {{ store.movie.runtime || 'No disponible' }}
+            minutos</span>
         </div>
 
         <div class="genres">
@@ -31,7 +33,7 @@
         <p class="creators">
           Creadores / Productores:
           <span v-if="store.creators && store.creators.length > 0">
-            {{ store.creators.map(c => c.name).join(', ') }}
+            {{store.creators.map(c => c.name).join(', ')}}
           </span>
           <span v-else>No disponible</span>
         </p>
@@ -41,14 +43,11 @@
 
           <div class="secondary-actions">
             <div class="action-item">
-              <button class="icon-button purple"
-                v-if="!listsStore.watchlist.includes(store.movie.id)"
+              <button class="icon-button purple" v-if="!listsStore.watchlist.includes(store.movie.id)"
                 @click="listsStore.addToList('watchlist', store.movie.id)">
                 <BookmarkIcon class="h-6 w-6" />
               </button>
-              <button class="icon-button purple"
-                v-else
-                @click="listsStore.removeFromList('watchlist', store.movie.id)">
+              <button class="icon-button purple" v-else @click="listsStore.removeFromList('watchlist', store.movie.id)">
                 <BookmarkSlashIcon class="h-6 w-6" />
               </button>
               <span v-if="listsStore.watchlist.includes(store.movie.id)">In Watchlist</span>
@@ -56,14 +55,11 @@
             </div>
 
             <div class="action-item">
-              <button class="icon-button green"
-                v-if="!listsStore.watched.includes(store.movie.id)"
+              <button class="icon-button green" v-if="!listsStore.watched.includes(store.movie.id)"
                 @click="listsStore.addToList('watched', store.movie.id)">
                 <EyeIcon class="h-6 w-6" />
               </button>
-              <button class="icon-button green"
-                v-else
-                @click="listsStore.removeFromList('watched', store.movie.id)">
+              <button class="icon-button green" v-else @click="listsStore.removeFromList('watched', store.movie.id)">
                 <EyeSlashIcon class="h-6 w-6" />
               </button>
               <span v-if="listsStore.watched.includes(store.movie.id)">Watched</span>
@@ -71,14 +67,11 @@
             </div>
 
             <div class="action-item">
-              <button class="icon-button yellow"
-                v-if="!listsStore.favorites.includes(store.movie.id)"
+              <button class="icon-button yellow" v-if="!listsStore.favorites.includes(store.movie.id)"
                 @click="listsStore.addToList('favorites', store.movie.id)">
                 <StarIcon class="h-6 w-6" />
               </button>
-              <button class="icon-button yellow"
-                v-else
-                @click="listsStore.removeFromList('favorites', store.movie.id)">
+              <button class="icon-button yellow" v-else @click="listsStore.removeFromList('favorites', store.movie.id)">
                 <XMarkIcon class="h-6 w-6" />
               </button>
               <span v-if="listsStore.favorites.includes(store.movie.id)">In Favorites</span>
@@ -92,7 +85,8 @@
           <GenericCarousel :items="store.cast" :item-width="180" :scroll-amount="150">
             <template #item="{ item: actor }">
               <div class="cast-card">
-                <img class="actor-img" :src="actor.image || 'https://via.placeholder.com/100x140?text=No+Image'" :alt="actor.name" />
+                <img class="actor-img" :src="actor.image || 'https://via.placeholder.com/100x140?text=No+Image'"
+                  :alt="actor.name" />
                 <div class="actor-info">
                   <p class="actor-name">{{ actor.name }}</p>
                   <p class="actor-role">Como: <strong>{{ actor.role }}</strong></p>
@@ -108,7 +102,8 @@
             <template #item="{ item: trailer }">
               <div class="trailer-card" @click="store.openTrailer(trailer.url)">
                 <div class="trailer-thumbnail">
-                  <img :src="`http://img.youtube.com/vi/${getYouTubeID(trailer.url)}/mqdefault.jpg`" alt="Trailer thumbnail" />
+                  <img :src="`http://img.youtube.com/vi/${getYouTubeID(trailer.url)}/mqdefault.jpg`"
+                    alt="Trailer thumbnail" />
                 </div>
                 <p class="trailer-name">{{ trailer.name }}</p>
               </div>
@@ -126,7 +121,21 @@
             </template>
           </GenericCarousel>
         </div>
+        <div v-if="store.activeImageUrl" class="modal-overlay" @click.self="store.closeImage">Add commentMore actions
+          <div class="modal-content image-modal-content">
+            <img :src="store.activeImageUrl" alt="Imagen ampliada" />
+            <button class="close-button" @click="store.closeImage">Cerrar</button>
+          </div>
+        </div>
+      </div>
 
+      <div v-if="store.activeTrailerUrl" class="modal-trailer" @click.self="store.closeTrailer">
+        <div class="modal-content">
+          <iframe width="100%" height="400"
+            :src="`https://www.youtube.com/embed/${getYouTubeID(store.activeTrailerUrl)}?autoplay=1`" frameborder="0"
+            allow="autoplay; encrypted-media" allowfullscreen></iframe>
+          <button class="close-button" @click="store.closeTrailer">Cerrar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -435,12 +444,14 @@ html {
   font-size: 1.25rem;
   cursor: pointer;
   z-index: 10;
-  opacity: 0.5; 
+  opacity: 0.5;
   transition: opacity 0.3s ease;
 }
+
 .back-button:hover {
-  opacity: 1; 
+  opacity: 1;
 }
+
 .back-button.left {
   left: 1rem;
 }
