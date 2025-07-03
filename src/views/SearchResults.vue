@@ -37,10 +37,6 @@
           <p>Año: {{ item.year }}</p>
           <p>Puntuación: {{ item.rating }}</p>
           <p class="description">{{ item.description }}</p>
-          <div class="button-group">
-            <button @click.stop="addToWatchlist(item)">+ Watchlist</button>
-            <button @click.stop="addToFavorites(item)">+ Favorites</button>
-          </div>
         </div>
       </div>
     </div>
@@ -51,12 +47,15 @@
 import { useSearchStore } from '@/storages/search.js';
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router'; // Import useRouter for navigation
+import { useListsStore } from '@/storages/lists'
+
 
 const props = defineProps({
   query: String
 });
 
 const searchStore = useSearchStore();
+const listsStore = useListsStore()
 const router = useRouter(); // Initialize the router instance
 
 // If accessed directly with the URL /search?q=text, this ensures the search is performed.

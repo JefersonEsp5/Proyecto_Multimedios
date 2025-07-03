@@ -1,34 +1,73 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import WatchingCard from '@/components/WatchingCard.vue'
 import SummaryCarousel from '@/components/SummaryCarousel.vue'
 import MovieNavbar from '@/components/MovieNavBar.vue'
+import { getSeriesDetails, getMovieDetails } from '@/services/tvdb'
 
 const selectedTab = ref('series') // puede ser 'series' o 'movies'
 const search = ref('')
 
-// Tus listas
-const series = [
-  {
-    image: 'https://artworks.thetvdb.com/banners/posters/705-1.jpg',
-    title: 'Severance',
-    episodeCode: 's05e02',
-    episodeTitle: 'In Perpetuity',
-    watched: 2,
-    total: 10,
-    left: 8
-  },
-  {
-    image: 'https://artworks.thetvdb.com/banners/posters/560-1.jpg',
-    title: 'Stranger Things',
-    episodeCode: 's04e01',
-    episodeTitle: 'The Hellfire Club',
-    watched: 1,
-    total: 9,
-    left: 8
-  }
+const seriesIds = [
+  { id: 70941, type: 'series', watched: 3, total: 10, left: 7 },
+  { id: 70919, type: 'series', watched: 6, total: 9, left: 3 }
 ]
-const movies = []
+
+const movieIds = [
+  { id: 609, type: 'movies', watched: 1, total: 1, left: 0 },
+  { id: 560, type: 'movies', watched: 1, total: 1, left: 0 }
+]
+
+const series = ref([])
+const movies = ref([])
+
+const defaultImage = '/default-placeholder.png'
+
+// tu lógica adaptada para traer la imagen y detalles
+async function fetchDetails(id, type) {
+  let data = null
+  let image = null
+
+  try {
+    data = await getSeriesDetails(id)
+    image = data?.image || (data?.artworks?.[0]?.image ?? null)
+  } catch (err) {
+    console.debug(`No es serie, probando película:`, err.message)
+  }
+
+  try {
+    if (!image) {
+      data = await getMovieDetails(id)
+      image = data?.image || (data?.artworks?.[0]?.image ?? null)
+    }
+  } catch (err) {
+    console.debug(`No es película`, err.message)
+  }
+
+  return {
+    title: data?.name || data?.title || 'Sin título',
+    overview: data?.overview || 'Sin descripción',
+    imageUrl: image ? `https://artworks.thetvdb.com${image}` : defaultImage
+  }
+}
+
+onMounted(async () => {
+  // Puedes pasar watched, total, left manual o dinámico
+  series.value = await Promise.all([
+    { id: 70930, type: 'series', watched: 7, total: 10, left: 3 },
+    { id: 70913, type: 'series', watched: 1, total: 9, left: 8 }
+  ].map(async item => {
+    const details = await fetchDetails(item.id, item.type)
+    return { ...item, ...details }
+  }))
+
+  movies.value = await Promise.all([
+    { id: 591, type: 'movies', watched: 3, total: 10, left: 7 }
+  ].map(async item => {
+    const details = await fetchDetails(item.id, item.type)
+    return { ...item, ...details }
+  }))
+})
 </script>
 
 <template>
@@ -104,5 +143,6 @@ const movies = []
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin-bottom: 5rem;
 }
 </style>

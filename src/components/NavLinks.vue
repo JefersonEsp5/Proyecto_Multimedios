@@ -101,7 +101,7 @@ export default {
   bottom: -2px;
   width: 100%;
   height: 2px;
-  background-color: #f39c12;
+  background-color: #6366f1;
   border-radius: 1px;
   transition: width 0.3s ease;
 }
